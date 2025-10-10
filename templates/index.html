@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catalog Search API - Welcome</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 15px;
+            background: #28a745;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .card-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-icon {
+            font-size: 1.3em;
+        }
+
+        .method-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 0.75em;
+            text-transform: uppercase;
+        }
+
+        .method-badge.post {
+            background: #28a745;
+            color: white;
+        }
+
+        .method-badge.get {
+            background: #007bff;
+            color: white;
+        }
+
+        .card-description {
+            color: #666;
+            font-size: 0.95em;
+            line-height: 1.6;
+            margin-top: 10px;
+        }
+
+        .search-form {
+            margin-top: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9em;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 0.95em;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-button {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .search-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .search-button:active {
+            transform: translateY(0);
+        }
+
+        .search-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .browse-button {
+            width: 100%;
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .browse-button:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 0.9em;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .docs-section {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            text-align: center;
+        }
+
+        .docs-title {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .docs-links {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .docs-link {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background 0.3s, transform 0.2s;
+            font-weight: 500;
+        }
+
+        .docs-link:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 968px) {
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🔍 Catalog Search API <span class="status">Active</span></h1>
+        <p class="subtitle">Digital Twins API for searching and retrieving catalog items</p>
+    </div>
+
+    <div class="cards-grid">
+        <!-- Search Datasets Card -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="card-icon">📊</span>
+                    <span>Search Datasets</span>
+                </div>
+                <span class="method-badge post">POST</span>
+                <span style="font-family: 'Courier New', monospace; color: #666; font-size: 0.9em; margin-left: 8px;">/search/datasets</span>
+            </div>
+            <p class="card-description">
+                Find datasets using semantic search. Describe what you're looking for and get relevant results.
+            </p>
+
+            <form class="search-form" id="searchDatasetsForm">
+                <div class="form-group">
+                    <label class="form-label" for="datasetDescription">Search Description</label>
+                    <textarea
+                            class="form-input"
+                            id="datasetDescription"
+                            placeholder="e.g., 'sentiment analysis for movie reviews'..."
+                            required
+                    ></textarea>
+                </div>
+                <button type="submit" class="search-button" id="datasetSearchButton">
+                    <span id="datasetButtonText">🔍 Search Datasets</span>
+                    <span class="spinner" id="datasetSpinner" style="display: none;"></span>
+                </button>
+            </form>
+
+            <div class="error-message" id="datasetErrorMessage"></div>
+        </div>
+
+        <!-- Search Models Card -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="card-icon">🤖</span>
+                    <span>Search Models</span>
+                </div>
+                <span class="method-badge post">POST</span>
+                <span style="font-family: 'Courier New', monospace; color: #666; font-size: 0.9em; margin-left: 8px;">/search/models</span>
+            </div>
+            <p class="card-description">
+                Find machine learning models using semantic search. Describe your use case to find matching models.
+            </p>
+
+            <form class="search-form" id="searchModelsForm">
+                <div class="form-group">
+                    <label class="form-label" for="modelDescription">Search Description</label>
+                    <textarea
+                            class="form-input"
+                            id="modelDescription"
+                            placeholder="e.g., 'text generation model for chatbots'..."
+                            required
+                    ></textarea>
+                </div>
+                <button type="submit" class="search-button" id="modelSearchButton">
+                    <span id="modelButtonText">🔍 Search Models</span>
+                    <span class="spinner" id="modelSpinner" style="display: none;"></span>
+                </button>
+            </form>
+
+            <div class="error-message" id="modelErrorMessage"></div>
+        </div>
+
+        <!-- Browse Datasets Card -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="card-icon">📚</span>
+                    <span>Browse Datasets</span>
+                </div>
+                <span class="method-badge get">GET</span>
+                <span style="font-family: 'Courier New', monospace; color: #666; font-size: 0.9em; margin-left: 8px;">/datasets</span>
+            </div>
+            <p class="card-description">
+                Explore the complete dataset catalog with detailed information, tags, and metadata in a visual card
+                layout.
+            </p>
+            <a href="/datasets" class="browse-button">
+                📋 View All Datasets
+            </a>
+        </div>
+
+        <!-- Browse Models Card -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="card-icon">🗂️</span>
+                    <span>Browse Models</span>
+                </div>
+                <span class="method-badge get">GET</span>
+                <span style="font-family: 'Courier New', monospace; color: #666; font-size: 0.9em; margin-left: 8px;">/models</span>
+            </div>
+            <p class="card-description">
+                Browse through the complete model catalog with detailed specifications, licenses, and performance
+                metrics.
+            </p>
+            <a href="/models" class="browse-button">
+                🔬 View All Models
+            </a>
+        </div>
+    </div>
+
+
+    <div class="docs-section">
+        <h2 class="docs-title">📖 API Documentation</h2>
+        <div class="docs-links">
+            <a href="/docs" class="docs-link">Interactive Swagger Docs</a>
+            <a href="/redoc" class="docs-link">ReDoc Documentation</a>
+        </div>
+    </div>
+</div>
+<script>
+
+</script>
+</body>
+</html>
