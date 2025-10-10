@@ -291,7 +291,7 @@
 <body>
 <div class="container">
     <div class="header">
-        <h1>🔍 Catalog Search API <span class="status">Active</span></h1>
+        <h1>🔍 Catalog Search API</h1>
         <p class="subtitle">Digital Twins API for searching and retrieving catalog items</p>
     </div>
 
@@ -367,17 +367,16 @@
             <div class="card-header">
                 <div class="card-title">
                     <span class="card-icon">📚</span>
-                    <span>Browse Datasets</span>
+                    <span>Sample Datasets</span>
                 </div>
                 <span class="method-badge get">GET</span>
                 <span style="font-family: 'Courier New', monospace; color: #666; font-size: 0.9em; margin-left: 8px;">/datasets</span>
             </div>
             <p class="card-description">
-                Explore the complete dataset catalog with detailed information, tags, and metadata in a visual card
-                layout.
+                Browse a sample of available datasets in the catalog with key details and metadata in a user-friendly card
             </p>
             <a href="/datasets" class="browse-button">
-                📋 View All Datasets
+                📋 View a sample
             </a>
         </div>
 
@@ -386,17 +385,16 @@
             <div class="card-header">
                 <div class="card-title">
                     <span class="card-icon">🗂️</span>
-                    <span>Browse Models</span>
+                    <span>Sample Models</span>
                 </div>
                 <span class="method-badge get">GET</span>
                 <span style="font-family: 'Courier New', monospace; color: #666; font-size: 0.9em; margin-left: 8px;">/models</span>
             </div>
             <p class="card-description">
-                Browse through the complete model catalog with detailed specifications, licenses, and performance
-                metrics.
+                Browse a sample of available machine learning models in the catalog with key details and metadata in a user-friendly card
             </p>
             <a href="/models" class="browse-button">
-                🔬 View All Models
+                🔬 View a sample
             </a>
         </div>
     </div>
@@ -411,6 +409,87 @@
     </div>
 </div>
 <script>
+// Handle dataset search form submission
+document.getElementById('searchDatasetsForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const button = document.getElementById('datasetSearchButton');
+    const buttonText = document.getElementById('datasetButtonText');
+    const spinner = document.getElementById('datasetSpinner');
+    const errorMessage = document.getElementById('datasetErrorMessage');
+    const description = document.getElementById('datasetDescription').value;
+
+    // Show loading state
+    button.disabled = true;
+    buttonText.style.display = 'none';
+    spinner.style.display = 'inline-block';
+    errorMessage.classList.remove('show');
+
+    try {
+        const formData = new FormData();
+        formData.append('description', description);
+        formData.append('top_k', '10');
+
+        const response = await fetch('/search/datasets', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (response.redirected) {
+            window.location.href = response.url;
+        } else if (!response.ok) {
+            throw new Error('Search failed');
+        }
+    } catch (error) {
+        errorMessage.textContent = 'Error performing search. Please try again.';
+        errorMessage.classList.add('show');
+    } finally {
+        button.disabled = false;
+        buttonText.style.display = 'inline';
+        spinner.style.display = 'none';
+    }
+});
+
+// Handle model search form submission
+document.getElementById('searchModelsForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const button = document.getElementById('modelSearchButton');
+    const buttonText = document.getElementById('modelButtonText');
+    const spinner = document.getElementById('modelSpinner');
+    const errorMessage = document.getElementById('modelErrorMessage');
+    const description = document.getElementById('modelDescription').value;
+
+    // Show loading state
+    button.disabled = true;
+    buttonText.style.display = 'none';
+    spinner.style.display = 'inline-block';
+    errorMessage.classList.remove('show');
+
+    try {
+        const formData = new FormData();
+        formData.append('description', description);
+        formData.append('top_k', '10');
+
+        const response = await fetch('/search/models', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (response.redirected) {
+            window.location.href = response.url;
+        } else if (!response.ok) {
+            throw new Error('Search failed');
+        }
+    } catch (error) {
+        errorMessage.textContent = 'Error performing search. Please try again.';
+        errorMessage.classList.add('show');
+    } finally {
+        button.disabled = false;
+        buttonText.style.display = 'inline';
+        spinner.style.display = 'none';
+    }
+});
 
 </script>
 </body>

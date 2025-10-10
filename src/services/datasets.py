@@ -1,67 +1,60 @@
 import ast
 import random
+
+from src.config import settings
 from src.models.schemas import DatasetItem
+from src.services import rag
 from typing import List, Optional
 import pandas as pd
+
+
+def load_data() -> pd.DataFrame:
+    return pd.read_csv(settings.DATASETS_CSV_PATH)
 
 
 class DatasetService:
     """Service for managing dataset catalog."""
 
-    def __init__(self):
-        self.datasets = self._load_datasets()
+    def __init__(self, rag_service: rag.RAGService):
+        self.data = load_data()
+        self.rag_service = rag_service
 
+    def get_sample(self, n: int = 10) -> List[DatasetItem]:
+        sample_df = self.data.sample(n=min(n, len(self.data)))
+        return [self._row_to_item(row) for _, row in sample_df.iterrows()]
 
-    def _load_datasets(self) -> List[DatasetItem]:
-        """Load datasets from CSV file.
-        !!potrebbe nn servire
-        """
-        df = pd.read_csv('data/datasets_hg_embeddings_sm.csv')
-        df = df.where(pd.notna(df), None)
+    def search(self, query: str, top_k: int = settings.DEFAULT_TOP_K) -> List[DatasetItem]:
+        results = self.rag_service.search(self.data, query, mode="dataset", top_k=top_k)
+        return [self._row_to_item(row) for _, row in results.iterrows()]
 
-        # Helper function to safely parse string lists
-        def safe_parse_list(value):
-            if value is None or value == '':
+    @staticmethod
+    def _row_to_item(row: pd.Series) -> DatasetItem:
+        def parse_list_field(value) -> List[str]:
+            """Convert CSV string representation to list, handling NaN values."""
+            if pd.isna(value):
                 return []
-            try:
-                return ast.literal_eval(value) if isinstance(value, str) else []
-            except:
-                return []
+            if isinstance(value, list):
+                return value
+            if isinstance(value, str):
+                try:
+                    # Use ast.literal_eval to safely parse string representation of list
+                    parsed = ast.literal_eval(value)
+                    return parsed if isinstance(parsed, list) else []
+                except (ValueError, SyntaxError):
+                    return []
+            return []
 
-        datasets = []
-        for _, row in df.iterrows():
-            dataset = DatasetItem(
-                dataset_id=str(row['dataset_id']) if row['dataset_id'] is not None else '',
-                author=str(row['author']) if row['author'] is not None else '',
-                created_at=str(row['created_at']) if row['created_at'] is not None else '',
-                readme_file=str(row['readme_file']) if row['readme_file'] is not None else '',
-                downloads=int(row['downloads']) if pd.notna(row['downloads']) else 0,
-                likes=int(row['likes']) if pd.notna(row['likes']) else 0,
-                tags=safe_parse_list(row.get('tags')),
-                language=safe_parse_list(row.get('language')),
-                license=str(row['license']) if row['license'] is not None else '',
-                multilinguality=safe_parse_list(row.get('multilinguality')),
-                size_categories=safe_parse_list(row.get('size_categories')),
-                task_categories=safe_parse_list(row.get('task_categories')),
-                embeddings=safe_parse_list(row.get('embeddings'))
-            )
-            datasets.append(dataset)
-
-        return datasets
-
-    def get_sample(self) -> List[DatasetItem]:
-        """Return a random sample of 10 datasets."""
-        return random.sample(self.datasets, min(10, len(self.datasets)))
-
-    def get_by_id(self, dataset_id: str) -> Optional[DatasetItem]:
-        """Get specific dataset by ID."""
-        for dataset in self.datasets:
-            if dataset.dataset_id == dataset_id:
-                return dataset
-        return None
-
-    def search(self, description: str, top_k: int = 10) -> str:
-        """Search datasets based on description."""
-        # Implement your search logic here
-
-        return "Search functionality not implemented yet. " + description + " top_k: " + str(top_k)
+        return DatasetItem(
+            dataset_id=str(row.get('dataset_id', '')),
+            author=str(row.get('author', '')),
+            created_at=str(row.get('created_at', '')),
+            readme_file=str(row.get('readme_file', '')),
+            downloads=int(row.get('downloads', 0)) if pd.notna(row.get('downloads')) else 0,
+            likes=int(row.get('likes', 0))  if pd.notna(row.get('likes')) else 0,
+            tags=parse_list_field(row.get('tags')),
+            language=parse_list_field(row.get('language')),
+            license=str(row.get('license', '')) if pd.notna(row.get('license')) else '',
+            multilinguality=parse_list_field(row.get('multilinguality')),
+            size_categories=parse_list_field(row.get('size_categories')),
+            task_categories=parse_list_field(row.get('task_categories')),
+        )
