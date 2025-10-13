@@ -1,5 +1,7 @@
 import ast
 
+import numpy as np
+
 from src.models.schemas import ModelItem
 from typing import List, Optional
 import pandas as pd
@@ -26,6 +28,29 @@ class ModelService:
         results = self.rag_service.search(self.data, query, mode="dataset", top_k=top_k)
         return [self._row_to_item(row) for _, row in results.iterrows()]
 
+    def add_model(self, item: ModelItem, embedding: np.array) -> None:
+        if item.model_id in self.data['model_id'].values:
+            raise ValueError(f"Model with ID {item.model_id} already exists.")
+
+        new_row = {
+            'model_id': item.model_id,
+            'base_model': item.base_model,
+            'author': item.author,
+            'readme_file': item.readme_file,
+            'license': item.license,
+            'language': str(item.language),
+            'downloads': item.downloads,
+            'likes': item.likes,
+            'tags': str(item.tags),
+            'pipeline_tag': item.pipeline_tag,
+            'library_name': item.library_name,
+            'created_at': item.created_at,
+            'embeddings': str(embedding.tolist()) if embedding is not None else '[]'
+        }
+
+        print("Adding new model:", new_row)
+        self.data = pd.concat([self.data, pd.DataFrame([new_row])], ignore_index=True)
+        self.data.to_csv(settings.MODELS_CSV_PATH, index=False)
 
     @staticmethod
     def _row_to_item(row: pd.Series) -> ModelItem:
@@ -57,4 +82,5 @@ class ModelService:
             pipeline_tag=str(row.get('pipeline_tag', '')),
             library_name=str(row.get('library_name', '')),
             created_at=str(row.get('created_at', '')),
+            # No embeddings field here, not needed in the frontend
         )

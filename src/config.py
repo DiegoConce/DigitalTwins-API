@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     APP_NAME: str = "Catalog Search API"
     APP_DESCRIPTION: str = "Digital Twins API for searching and retrieving catalog items."
 
-    # Search settings -- aggiusta
+    # Search settings
     DEFAULT_TOP_K: int = 3
 
     # Hugging Face API settings
@@ -21,9 +21,9 @@ class Settings(BaseSettings):
     EMBEDDING_MODEL_NAME: str = "jinaai/jina-embeddings-v3"
 
     # Device settings
-    DEVICE: Literal["cpu", "cuda", "auto"] = "cuda"  # auto, cpu, cuda
-    EMBEDDING_DEVICE: Literal["cpu", "cuda", "auto"] = "cuda"  # Specifico per embeddings
-    LLM_DEVICE: Literal["cpu", "cuda", "auto"] = "cuda"  # Specifico per LLM
+    DEVICE: Literal["cpu", "cuda", "auto"] = "cpu"  # auto, cpu, cuda
+    EMBEDDING_DEVICE: Literal["cpu", "cuda", "auto"] = "cpu"  # Specifico per embeddings
+    LLM_DEVICE: Literal["cpu", "cuda", "auto"] = "cpu"  # Specifico per LLM
 
 
     # Prompt settings

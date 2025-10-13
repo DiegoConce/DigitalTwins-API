@@ -6,6 +6,7 @@ import torch
 from transformers import AutoModel, AutoModelForCausalLM, AutoTokenizer
 from huggingface_hub import login
 from src.config import settings
+from src.models.schemas import DatasetItem, ModelItem
 
 
 def get_device(device_config: Literal["cpu", "cuda", "auto"] = "auto") -> str:
@@ -47,6 +48,40 @@ class EmbeddingService:
 
         return embedding
 
+    def encode_dataset_item(self, item: DatasetItem) -> np.ndarray:
+        full_text = "\n".join([
+            item.dataset_id,
+            item.author,
+            item.created_at,
+            item.readme_file,
+            str(item.downloads),
+            str(item.likes),
+            str(item.tags),
+            str(item.language),
+            item.license,
+            str(item.multilinguality),
+            str(item.size_categories),
+            str(item.task_categories)
+        ])
+        return self.encode(full_text)
+
+    def encode_model_item(self, item: ModelItem) -> np.ndarray:
+        full_text = "\n".join([
+            item.model_id,
+            item.base_model,
+            item.author,
+            item.readme_file,
+            item.license,
+            str(item.language),
+            str(item.downloads),
+            str(item.likes),
+            str(item.tags),
+            item.pipeline_tag,
+            item.library_name,
+            item.created_at
+        ])
+        return self.encode(full_text)
+
 
 class SimilarityCalculator:
     """Calcola la similarità tra embeddings."""
@@ -59,7 +94,6 @@ class SimilarityCalculator:
     def filter_by_score(data: pd.DataFrame,
                         query_embedding: np.ndarray,
                         top_k: int = settings.DEFAULT_TOP_K) -> pd.DataFrame:
-
         data = data.copy()
         data['embeddings'] = data['embeddings'].apply(
             lambda x: np.array(ast.literal_eval(x)) if isinstance(x, str) else x
@@ -164,7 +198,6 @@ class RAGService:
             mode: Literal["model", "dataset"] = "model",
             top_k: int = settings.DEFAULT_TOP_K
     ) -> pd.DataFrame:
-
         # Step 1: Embedding similarity
         query_embedding = self.embedding_service.encode(query)
         filtered_data = self.similarity_calculator.filter_by_score(
@@ -184,6 +217,6 @@ class RAGService:
                 indices_to_keep.append(idx) 
         """
 
-        #return filtered_data.loc[indices_to_keep].reset_index(drop=True)
+        # return filtered_data.loc[indices_to_keep].reset_index(drop=True)
 
-        return filtered_data.reset_index(drop=True) #-> check on why embeddings is empty
+        return filtered_data.reset_index(drop=True)

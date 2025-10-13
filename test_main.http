@@ -3,9 +3,16 @@
 GET http://127.0.0.1:8000/models
 Accept: application/json
 
-###
-
-GET http://127.0.0.1:8000/hello/User
+### Add a new dataset item
+POST http://127.0.0.1:8000/datasets/add
+Content-Type: application/x-www-form-urlencoded
 Accept: application/json
 
-###
+dataset_id=my-new-dataset-diego
+
+### Add a new model item
+POST http://127.0.0.1:8000/models/add
+Content-Type: application/x-www-form-urlencoded
+Accept: application/json
+
+model_id=my-new-model-diego
