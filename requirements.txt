@@ -1,0 +1,25 @@
+# Web Framework
+fastapi==0.119.0
+uvicorn==0.37.0
+python-multipart==0.0.20
+jinja2==3.1.5
+
+# Machine Learning and data processing
+huggingface_hub==0.35.3
+numpy==2.3.3
+pandas==2.3.3
+torch==2.8.0+cu126
+safetensors==0.6.2
+transformers==4.57.0
+einops==0.8.1
+tokenizers==0.22.1
+
+# Config
+pydantic==2.12.0
+pydantic_settings==2.11.0
+starlette==0.48.0
+
+# HTTP Client
+httpx==0.28.0
+
+

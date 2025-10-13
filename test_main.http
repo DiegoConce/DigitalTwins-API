@@ -1,18 +1,42 @@
-# Test your FastAPI endpoints
+# FastApi Route Tests
 
-GET http://127.0.0.1:8000/models
-Accept: application/json
+@baseUrl = http://127.0.0.1:8000
+
+### Root
+GET {{baseUrl}}/
+Accept: text/html
+
+### Sample Datasets
+GET {{baseUrl}}/datasets
 
 ### Add a new dataset item
 POST http://127.0.0.1:8000/datasets/add
 Content-Type: application/x-www-form-urlencoded
 Accept: application/json
 
-dataset_id=my-new-dataset-diego
+dataset_id = my-new-dataset-diego
+
+### Search datasets
+POST {{baseUrl}}/datasets/search
+Content-Type: application/x-www-form-urlencoded
+Accept: application/json
+
+description = sentiment analysis
+
+### Sample Models
+GET {{baseUrl}}/models
 
 ### Add a new model item
 POST http://127.0.0.1:8000/models/add
 Content-Type: application/x-www-form-urlencoded
 Accept: application/json
 
-model_id=my-new-model-diego
+model_id = my-new-model-diego
+
+### Search models
+POST {{baseUrl}}/models/search
+Content-Type: application/x-www-form-urlencoded
+Accept: application/json
+
+description = text classification
+

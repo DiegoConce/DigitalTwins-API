@@ -209,14 +209,12 @@ class RAGService:
         print("Filtered data after similarity:", filtered_data)
 
         # Step 2: LLM filtering
-        """
         indices_to_keep = []
         for idx, row in filtered_data.iterrows():
             content = self.content_builder.build(row, mode)
             if self.llm_filter.is_relevant(content):
-                indices_to_keep.append(idx) 
-        """
+                indices_to_keep.append(idx)
 
-        # return filtered_data.loc[indices_to_keep].reset_index(drop=True)
+        return filtered_data.loc[indices_to_keep].reset_index(drop=True)
 
-        return filtered_data.reset_index(drop=True)
+        # return filtered_data.reset_index(drop=True)

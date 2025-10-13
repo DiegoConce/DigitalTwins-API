@@ -1,6 +1,7 @@
 from typing import List, Optional
 from pydantic import BaseModel
 
+
 # Pydantic models: they define the shape of data for requests and responses.
 
 class DatasetItem(BaseModel):
@@ -33,19 +34,3 @@ class ModelItem(BaseModel):
     library_name: Optional[str] = ""
     created_at: Optional[str] = ""
     embeddings: List[str] = []
-
-
-class SearchRequest(BaseModel):
-    """Request body for search queries."""
-    description: str
-
-
-class SearchResult(BaseModel):
-    """A single search result item."""
-    item: DatasetItem or ModelItem
-
-
-class SearchResponse(BaseModel):
-    query: str
-    results: List[SearchResult] = []
-    total_results: int
