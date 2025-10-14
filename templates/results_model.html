@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Models Search Results - Catalog Search API</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.15);
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateX(-4px);
+        }
+
+        h1 {
+            color: white;
+            font-size: 2.2em;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .results-count {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1em;
+            font-weight: 400;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 24px;
+        }
+
+        .results-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e5e7eb;
+            transition: all 0.2s ease;
+        }
+
+        .result-card:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            border-color: #667eea;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            gap: 16px;
+        }
+
+        .result-title-section {
+            flex: 1;
+        }
+
+        .result-title {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+
+        .result-author {
+            color: #6b7280;
+            font-size: 0.95em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .download-btn:active {
+            transform: translateY(0);
+        }
+
+        .readme-section {
+            background: #f9fafb;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            line-height: 1.6;
+            color: #374151;
+            font-size: 0.95em;
+            max-height: 150px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .readme-section::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background: linear-gradient(transparent, #f9fafb);
+        }
+
+        .readme-section:empty::before {
+            content: 'No description available';
+            color: #9ca3af;
+            font-style: italic;
+        }
+
+        .result-stats {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 16px;
+            padding: 12px 0;
+            border-top: 1px solid #e5e7eb;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #6b7280;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        .stat-icon {
+            font-size: 1.2em;
+        }
+
+        .metadata-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .metadata-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .metadata-label {
+            font-size: 0.75em;
+            color: #9ca3af;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .metadata-value {
+            font-size: 0.9em;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .tags-section {
+            margin-top: 16px;
+        }
+
+        .tags-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .tag {
+            background: #f3f4f6;
+            color: #4b5563;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 0.85em;
+            font-weight: 500;
+            border: 1px solid #e5e7eb;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+
+        .no-results-icon {
+            font-size: 4em;
+            margin-bottom: 16px;
+        }
+
+        .no-results-text {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .result-header {
+                flex-direction: column;
+            }
+
+            .download-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .metadata-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="header-content">
+        <a href="/" class="back-btn">← Back to Home</a>
+        <h1>🔍 Models Search Results</h1>
+        <p class="results-count">Found {{ results|length }} result(s)</p>
+    </div>
+</div>
+
+<div class="container">
+    {% if results %}
+    <div class="results-list">
+        {% for item in results %}
+        <div class="result-card">
+            <div class="result-header">
+                <div class="result-title-section">
+                    <h2 class="result-title">{{ item.model_id or item.dataset_id }}</h2>
+                    {% if item.author %}
+                    <p class="result-author">
+                        <span>👤</span>
+                        <span>{{ item.author }}</span>
+                    </p>
+                    {% endif %}
+                </div>
+                <button class="download-btn">
+                    <span>⬇️</span>
+                    <span>Download</span>
+                </button>
+            </div>
+
+            {% if item.readme_file %}
+            <div class="readme-section">
+                {{ item.readme_file[:400] }}{% if item.readme_file|length > 400 %}...{% endif %}
+            </div>
+            {% else %}
+            <div class="readme-section"></div>
+            {% endif %}
+
+            <div class="result-stats">
+                <div class="stat-item">
+                    <span class="stat-icon">⬇️</span>
+                    <span>{{ "{:,}".format(item.downloads) }} downloads</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-icon">❤️</span>
+                    <span>{{ item.likes }} likes</span>
+                </div>
+                {% if item.created_at %}
+                <div class="stat-item">
+                    <span class="stat-icon">📅</span>
+                    <span>{{ item.created_at }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="metadata-grid">
+                {% if item.license %}
+                <div class="metadata-item">
+                    <div class="metadata-label">License</div>
+                    <div class="metadata-value">
+                        <span class="badge">{{ item.license }}</span>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if item.library_name %}
+                <div class="metadata-item">
+                    <div class="metadata-label">Library</div>
+                    <div class="metadata-value">{{ item.library_name }}</div>
+                </div>
+                {% endif %}
+
+                {% if item.pipeline_tag %}
+                <div class="metadata-item">
+                    <div class="metadata-label">Pipeline</div>
+                    <div class="metadata-value">{{ item.pipeline_tag }}</div>
+                </div>
+                {% endif %}
+
+                {% if item.base_model %}
+                <div class="metadata-item">
+                    <div class="metadata-label">Base Model</div>
+                    <div class="metadata-value">{{ item.base_model }}</div>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if item.tags %}
+            <div class="tags-section">
+                <div class="metadata-label">Tags</div>
+                <div class="tags-wrapper">
+                    {% for tag in item.tags[:8] %}
+                    <span class="tag">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="no-results">
+        <div class="no-results-icon">🔍</div>
+        <div class="no-results-text">No results found</div>
+        <p>Try adjusting your search query</p>
+    </div>
+    {% endif %}
+</div>
+</body>
+</html>
