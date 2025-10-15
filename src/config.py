@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     HUGGINGFACE_API_TOKEN: str = "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"
 
     # Model settings
-    LANGUAGE_MODEL_NAME: str = "meta-llama/Llama-3.2-3B" #"meta-llama/Llama-3.1-8B-Instruct"
+    LANGUAGE_MODEL_NAME: str = "meta-llama/Llama-3.2-3B"    #"meta-llama/Llama-3.1-8B-Instruct"
     EMBEDDING_MODEL_NAME: str = "jinaai/jina-embeddings-v3"
 
     # Device settings

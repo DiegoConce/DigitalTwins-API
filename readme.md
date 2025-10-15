@@ -90,6 +90,26 @@ The application will be available at:
 - **API Documentation (Swagger)**: http://localhost:8000/docs
 - **ReDoc**: http://localhost:8000/redoc
 
+# 🐳 Docker Deployment
+
+1. **Build the Docker image and start the container**
+Using Docker Compose, you can build your image and start the container in one step:
+```bash
+sudo docker-compose up --build
+```
+
+2. **Run the container in the background (optional)**
+-d runs the container detached, so it doesn’t block your terminal.
+```bash
+sudo docker compose up -d
+```
+
+
+
+
+
+
+
 ## 📖 Tutorial
 
 ### 1. Accessing the Web Interface
@@ -236,6 +256,8 @@ LANGUAGE_MODEL_NAME="microsoft/phi-2"
 
 ```
 DigitalTwins-API/
+├── data/                       # Root-level data folder
+│   ├── data.zip                # Unpack this to get datasets/models CSVs
 ├── src/
 │   ├── main.py                 # FastAPI application & endpoints
 │   ├── config.py               # Configuration management
@@ -249,13 +271,16 @@ DigitalTwins-API/
 │   ├── index.html
 │   ├── datasets.html
 │   └── models.html
+│   └── results_model.html
+│   └── results_dataset.html
 ├── data/
 │   ├── datasets_hg_embeddings_sm.csv  # Dataset catalog
 │   └── models_hg_embeddings_sm.csv    # Model catalog
 ├── requirements.txt            # Python dependencies
-├── .env                        # Environment configuration
 ├── test_main.http              # HTTP test requests
 └── readme.md                   # This file
+└── Dockerfile                  # Dockerfile for containerization
+└── docker-compose.yaml         # Docker Compose configuration
 ```
 
 ## 🔌 API Endpoints
