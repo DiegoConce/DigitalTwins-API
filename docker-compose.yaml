@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    container_name: digitaltwins-api
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_NAME=Catalog Search API
+      - APP_DESCRIPTION=Digital Twins API for searching and retrieving catalog items.
+      - EMBEDDING_MODEL_NAME=jinaai/jina-embeddings-v3
+      - LANGUAGE_MODEL_NAME=meta-llama/Llama-3.1-8B-Instruct
+      - HUGGINGFACE_API_TOKEN=${HUGGINGFACE_API_TOKEN}
+      - DEVICE=auto
+      - EMBEDDING_DEVICE=auto
+      - LLM_DEVICE=auto
+      - DEFAULT_TOP_K=3
+      - DATASETS_CSV_PATH=data/datasets_hg_embeddings_sm.csv
+      - MODELS_CSV_PATH=data/models_hg_embeddings_sm.csv
+      - PROMPT_TEMPLATE=As an intelligent language model, your role is to accurately determine whether the provided data is relevant to the user's query. Answer ONLY with 'Yes' or 'No'
+    restart: unless-stopped
