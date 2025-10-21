@@ -108,7 +108,8 @@ class ContentBuilder:
     """Costruisce il contenuto per il prompt LLM."""
 
     @staticmethod
-    def build(data: pd.Series, mode: Literal["model", "dataset"]) -> str:
+    def build(data: dict, mode: Literal["model", "dataset"]) -> str:
+        """Build content from metadata dictionary instead of pandas Series."""
         if mode == "model":
             return "\n".join([
                 str(data.get('model_id', '')),
@@ -193,30 +194,58 @@ class RAGService:
 
     def search(
             self,
-            data: pd.DataFrame,
+            qdrant_service,
+            storage_service,
             query: str,
-            mode: Literal["model", "dataset"] = "model",
-            top_k: int = settings.DEFAULT_TOP_K
-    ) -> pd.DataFrame:
-        # Step 1: Embedding similarity
-        query_embedding = self.embedding_service.encode(query)
-        filtered_data = self.similarity_calculator.filter_by_score(
-            data,
-            query_embedding,
-            top_k
-        )
-
-        print("Filtered data after similarity:", filtered_data)
-
-        # Step 2: LLM filtering
+            mode: Literal["model", "dataset"],
+            top_k: int = settings.DEFAULT_TOP_K,
+            use_llm_filter: bool = settings.USE_LLM_FILTER
+    ) -> List[dict]:
         """
-        indices_to_keep = []
-        for idx, row in filtered_data.iterrows():
-            content = self.content_builder.build(row, mode)
-            if self.llm_filter.is_relevant(content):
-                indices_to_keep.append(idx)
+        Perform semantic search using Qdrant vector database.
 
-        return filtered_data.loc[indices_to_keep].reset_index(drop=True)
+        Args:
+            qdrant_service: QdrantService instance for vector search
+            storage_service: StorageService instance for metadata retrieval
+            query: Search query string
+            mode: "model" or "dataset"
+            top_k: Number of results to return
+            use_llm_filter: Whether to apply LLM relevance filtering
 
-"""
-        return filtered_data.reset_index(drop=True)
+        Returns:
+            List of metadata dictionaries
+        """
+        # Generate query embedding
+        query_embedding = self.embedding_service.encode(query)
+
+        # Search in Qdrant (get more results if filtering)
+        # search_limit = top_k * 3 if use_llm_filter else top_k
+
+        if mode == "dataset":
+            qdrant_results = qdrant_service.search_datasets(query_embedding, top_k)
+            get_metadata = storage_service.get_dataset_by_id
+        else:
+            qdrant_results = qdrant_service.search_models(query_embedding, top_k)
+            get_metadata = storage_service.get_model_by_id
+
+        # Retrieve full metadata and optionally filter with LLM
+        results = []
+        for result in qdrant_results:
+            item_id = result['dataset_id'] if mode == "dataset" else result['model_id']
+            metadata = get_metadata(item_id)
+
+            if metadata:
+                # Apply LLM filter if enabled
+                if use_llm_filter:
+                    content = self.content_builder.build(metadata, mode=mode)
+                    full_content = f"Query: {query}\n\n{'Dataset' if mode == 'dataset' else 'Model'} Info:\n{content}"
+                    if not self.llm_filter.is_relevant(full_content):
+                        continue
+
+                results.append(metadata)
+
+                # Stop if we have enough results
+                if len(results) >= top_k:
+                    break
+
+        return results

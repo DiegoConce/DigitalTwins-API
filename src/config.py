@@ -12,6 +12,7 @@ class Settings(BaseSettings):
 
     # Search settings
     DEFAULT_TOP_K: int = 3 # Number of top results to return
+    USE_LLM_FILTER: bool = False  # Whether to use LLM-based relevance filtering
 
     # Hugging Face API settings
     HUGGINGFACE_API_TOKEN: str = "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"
@@ -32,10 +33,6 @@ class Settings(BaseSettings):
     Answer ONLY with 'Yes' or 'No'
     """
 
-    # Data paths
-    DATASETS_CSV_PATH: str = "/home/diego/Documenti/Workspace/DigitalTwins-API/data/datasets_hg_embeddings_sm.csv"
-    MODELS_CSV_PATH: str = "/home/diego/Documenti/Workspace/DigitalTwins-API/data/models_hg_embeddings_sm.csv"
-
     #MinIo settings
     MINIO_ENDPOINT: str = "localhost:9000"
     MINIO_ACCESS_KEY: str = "minioadmin"
@@ -43,6 +40,14 @@ class Settings(BaseSettings):
     MINIO_SECURE: bool = False                      # Disable HTTPs for local testing
     MINIO_DATASETS_BUCKET: str = "datasets"
     MINIO_MODELS_BUCKET: str = "models"
+
+    # Qdrant VectorDB settings
+    QDRANT_HOST: str = "localhost"
+    QDRANT_PORT: int = 6333
+    QDRANT_USE_HTTPS: bool = False
+    QDRANT_DATASETS_COLLECTION: str = "datasets"
+    QDRANT_MODELS_COLLECTION: str = "models"
+    VECTOR_SIZE: int = 1024  # Jina embeddings v3 dimension
 
     class Config:
         env_file = ".env"

@@ -25,4 +25,5 @@ httpx==0.28.1
 # Storage
 minio==7.2.16
 
-
+# VectorDB
+qdrant-client==1.15.1

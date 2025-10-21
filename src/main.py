@@ -73,14 +73,15 @@ async def search_datasets(description: str = Form(...)):
 
 
 @app.get("/search/datasets/{search_id}", response_class=HTMLResponse)
-async def get_search_results(search_id: str):
+async def get_search_results(search_id: str, request: Request):
+
     if search_id not in search_results_cache:
         raise HTTPException(status_code=404, detail="Search ID not found")
 
     results = search_results_cache[search_id]
 
     return templates.TemplateResponse("results_dataset.html", {
-        "request": {},
+        "request": request,
         "results": results
     })
 
@@ -132,14 +133,14 @@ async def search_models(description: str = Form(...)):
 
 
 @app.get("/search/models/{search_id}", response_class=HTMLResponse)
-async def get_model_search_results(search_id: str):
+async def get_model_search_results(search_id: str, request: Request):
     if search_id not in search_results_cache:
         raise HTTPException(status_code=404, detail="Search ID not found")
 
     results = search_results_cache[search_id]
 
     return templates.TemplateResponse("results_model.html", {
-        "request": {},
+        "request": request,
         "results": results
     })
 
