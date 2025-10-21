@@ -133,34 +133,3 @@ class QdrantService:
             for hit in search_result.points
         ]
 
-
-if __name__ == "__main__":
-
-        import pandas as pd
-        from tqdm import tqdm
-    
-        qdrant_service = QdrantService()
-    
-    
-        def bulk_upsert_datasets(csv_path: str):
-            df = pd.read_csv(csv_path)
-            print("Loaded dataset CSV with shape:", df.shape)
-    
-            for _, row in tqdm(df.iterrows(), total=len(df), desc="Upserting datasets"):
-                dataset_id = row['dataset_id']
-                embedding = np.fromstring(row['embeddings'][1:-1], sep=',').astype(np.float32)
-                qdrant_service.upsert_dataset(dataset_id, embedding)
-    
-        def bulk_upsert_models(csv_path: str):
-            df = pd.read_csv(csv_path)
-            print("Loaded model CSV with shape:", df.shape)
-    
-            for _, row in tqdm(df.iterrows(), total=len(df), desc="Upserting models"):
-                model_id = row['model_id']
-                embedding = np.fromstring(row['embeddings'][1:-1], sep=',').astype(np.float32)
-                qdrant_service.upsert_model(model_id, embedding)
-    
-        bulk_upsert_datasets("/home/diego/Documenti/Workspace/DigitalTwins-API/data/datasets_hg_embeddings_sm.csv")
-        bulk_upsert_models("/home/diego/Documenti/Workspace/DigitalTwins-API/data/models_hg_embeddings_sm.csv")
-    
-
