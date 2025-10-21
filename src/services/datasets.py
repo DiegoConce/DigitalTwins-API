@@ -1,12 +1,11 @@
 import ast
 import random
-
 import numpy as np
-
 from src.config import settings
 from src.models.schemas import DatasetItem
 from src.services import rag
-from typing import List, Optional
+from src.services.storage import StorageService
+from typing import List, Optional, Dict
 import pandas as pd
 
 
@@ -17,42 +16,42 @@ def load_data() -> pd.DataFrame:
 class DatasetService:
     """Service for managing dataset catalog."""
 
-    def __init__(self, rag_service: rag.RAGService):
-        self.data = load_data()
+    def __init__(self, rag_service: rag.RAGService, storage_service: StorageService):
+        self.data = load_data() # nn servira piu
         self.rag_service = rag_service
+        self.storage_service = storage_service
 
-    def get_sample(self, n: int = 10) -> List[DatasetItem]:
-        sample_df = self.data.sample(n=min(n, len(self.data)))
-        return [self._row_to_item(row) for _, row in sample_df.iterrows()]
+    def get_sample(self) -> List[DatasetItem]:
+        sample = self.storage_service.get_dataset_sample(10)
+        return [self.dict_to_dataset_item(res) for res in sample]
 
     def search(self, query: str, top_k: int = settings.DEFAULT_TOP_K) -> List[DatasetItem]:
         results = self.rag_service.search(self.data, query, mode="dataset", top_k=top_k)
         return [self._row_to_item(row) for _, row in results.iterrows()]
 
-    def add_dataset(self, item: DatasetItem, embedding: np.ndarray = None) -> None:
+    def add_dataset(self, item: DatasetItem, embedding: np.ndarray) -> None:
         """Add a new dataset to the catalog."""
-        if item.dataset_id in self.data['dataset_id'].values:
-            raise ValueError(f"Dataset with ID {item.dataset_id} already exists.")
+        dataset_id = item.author + "/" + item.dataset_id
 
-        new_row = {
+        if self.storage_service.get_dataset_by_id(dataset_id):
+            raise ValueError(f"Dataset with ID {dataset_id} already exists.")
+
+        metadata = {
             'dataset_id': item.dataset_id,
             'author': item.author,
             'created_at': item.created_at,
             'readme_file': item.readme_file,
             'downloads': item.downloads,
             'likes': item.likes,
-            'tags': str(item.tags),
-            'language': str(item.language),
+            'tags': item.tags,
+            'language': item.language,
             'license': item.license,
-            'multilinguality': str(item.multilinguality),
-            'size_categories': str(item.size_categories),
-            'task_categories': str(item.task_categories),
-            'embeddings': str(embedding.tolist()) if embedding is not None else '[]'
+            'multilinguality': item.multilinguality,
+            'size_categories': item.size_categories,
+            'task_categories': item.task_categories,
         }
 
-        print("Adding new dataset:", new_row)
-        self.data = pd.concat([self.data, pd.DataFrame([new_row])], ignore_index=True)
-        self.data.to_csv(settings.DATASETS_CSV_PATH, index=False)
+        self.storage_service.store_dataset(dataset_id, metadata, embedding)
 
     @staticmethod
     def _row_to_item(row: pd.Series) -> DatasetItem:
@@ -85,4 +84,37 @@ class DatasetService:
             size_categories=parse_list_field(row.get('size_categories')),
             task_categories=parse_list_field(row.get('task_categories')),
             # No embeddings field here, not needed in the frontend
+        )
+
+    @staticmethod
+    def dict_to_dataset_item(metadata: Dict) -> DatasetItem:
+        """Convert a metadata dictionary into a DatasetItem object."""
+
+        def ensure_list(value):
+            """Helper to ensure the value is a list."""
+            if value is None:
+                return []
+            if isinstance(value, str):
+                try:
+                    parsed = ast.literal_eval(value)
+                    return parsed if isinstance(parsed, list) else [value]
+                except Exception:
+                    return [value]
+            if isinstance(value, list):
+                return value
+            return [value]
+
+        return DatasetItem(
+            dataset_id=str(metadata.get("dataset_id", "")),
+            author=str(metadata.get("author", "")),
+            created_at=str(metadata.get("created_at", "")),
+            readme_file=str(metadata.get("readme_file", "")),
+            downloads=int(metadata.get("downloads", 0)),
+            likes=int(metadata.get("likes", 0)),
+            tags=ensure_list(metadata.get("tags")),
+            language=ensure_list(metadata.get("language")),
+            license=str(metadata.get("license", "")),
+            multilinguality=ensure_list(metadata.get("multilinguality")),
+            size_categories=ensure_list(metadata.get("size_categories")),
+            task_categories=ensure_list(metadata.get("task_categories"))
         )

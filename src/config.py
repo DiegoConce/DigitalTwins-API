@@ -33,8 +33,16 @@ class Settings(BaseSettings):
     """
 
     # Data paths
-    DATASETS_CSV_PATH: str = "data/datasets_hg_embeddings_sm.csv"
-    MODELS_CSV_PATH: str = "data/models_hg_embeddings_sm.csv"
+    DATASETS_CSV_PATH: str = "/home/diego/Documenti/Workspace/DigitalTwins-API/data/datasets_hg_embeddings_sm.csv"
+    MODELS_CSV_PATH: str = "/home/diego/Documenti/Workspace/DigitalTwins-API/data/models_hg_embeddings_sm.csv"
+
+    #MinIo settings
+    MINIO_ENDPOINT: str = "localhost:9000"
+    MINIO_ACCESS_KEY: str = "minioadmin"
+    MINIO_SECRET_KEY: str = "minioadmin"
+    MINIO_SECURE: bool = False                      # Disable HTTPs for local testing
+    MINIO_DATASETS_BUCKET: str = "datasets"
+    MINIO_MODELS_BUCKET: str = "models"
 
     class Config:
         env_file = ".env"

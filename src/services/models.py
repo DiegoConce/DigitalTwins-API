@@ -1,12 +1,11 @@
 import ast
-
 import numpy as np
-
 from src.models.schemas import ModelItem
 from typing import List, Optional
 import pandas as pd
 import random
 from src.config import settings
+from src.services.storage import StorageService
 from src.services import rag
 
 
@@ -16,41 +15,42 @@ def load_data() -> pd.DataFrame:
 
 class ModelService:
 
-    def __init__(self, rag_service: rag.RAGService):
+    def __init__(self, rag_service: rag.RAGService, storage_service: StorageService):
         self.data = load_data()
         self.rag_service = rag_service
+        self.storage_service = storage_service
 
     def get_sample(self, n: int = 10) -> List[ModelItem]:
-        sample_df = self.data.sample(n=min(n, len(self.data)))
-        return [self._row_to_item(row) for _, row in sample_df.iterrows()]
+        sample = self.storage_service.get_model_sample(10)
+        return [self.dict_to_model_item(res) for res in sample]
 
     def search(self, query: str, top_k: int = settings.DEFAULT_TOP_K) -> List[ModelItem]:
         results = self.rag_service.search(self.data, query, mode="dataset", top_k=top_k)
         return [self._row_to_item(row) for _, row in results.iterrows()]
 
     def add_model(self, item: ModelItem, embedding: np.array) -> None:
-        if item.model_id in self.data['model_id'].values:
-            raise ValueError(f"Model with ID {item.model_id} already exists.")
+        """Add a new model to the catalog."""
+        model_id = item.author + "/" + item.model_id
 
-        new_row = {
+        if self.storage_service.get_model_by_id(model_id):
+            raise ValueError(f"Model with ID {model_id} already exists.")
+
+        metadata = {
             'model_id': item.model_id,
             'base_model': item.base_model,
             'author': item.author,
             'readme_file': item.readme_file,
             'license': item.license,
-            'language': str(item.language),
+            'language': item.language,
             'downloads': item.downloads,
             'likes': item.likes,
-            'tags': str(item.tags),
+            'tags': item.tags,
             'pipeline_tag': item.pipeline_tag,
             'library_name': item.library_name,
             'created_at': item.created_at,
-            'embeddings': str(embedding.tolist()) if embedding is not None else '[]'
         }
 
-        print("Adding new model:", new_row)
-        self.data = pd.concat([self.data, pd.DataFrame([new_row])], ignore_index=True)
-        self.data.to_csv(settings.MODELS_CSV_PATH, index=False)
+        self.storage_service.store_model(model_id, metadata, embedding)
 
     @staticmethod
     def _row_to_item(row: pd.Series) -> ModelItem:
@@ -83,4 +83,37 @@ class ModelService:
             library_name=str(row.get('library_name', '')),
             created_at=str(row.get('created_at', '')),
             # No embeddings field here, not needed in the frontend
+        )
+
+    @staticmethod
+    def dict_to_model_item(metadata: dict) -> ModelItem:
+        """Convert a metadata dictionary into a ModelItem object."""
+
+        def ensure_list(value):
+            """Helper to ensure the value is a list."""
+            if value is None:
+                return []
+            if isinstance(value, list):
+                return value
+            if isinstance(value, str):
+                try:
+                    parsed = ast.literal_eval(value)
+                    return parsed if isinstance(parsed, list) else []
+                except (ValueError, SyntaxError):
+                    return []
+            return []
+
+        return ModelItem(
+            model_id=str(metadata.get('model_id', '')),
+            base_model=str(metadata.get('base_model', '')),
+            author=str(metadata.get('author', '')),
+            readme_file=str(metadata.get('readme_file', '')),
+            license=str(metadata.get('license', '')),
+            language=ensure_list(metadata.get('language')),
+            downloads=int(metadata.get('downloads', 0)),
+            likes=int(metadata.get('likes', 0)),
+            tags=ensure_list(metadata.get('tags')),
+            pipeline_tag=str(metadata.get('pipeline_tag', '')),
+            library_name=str(metadata.get('library_name', '')),
+            created_at=str(metadata.get('created_at', '')),
         )

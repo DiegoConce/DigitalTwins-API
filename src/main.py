@@ -4,9 +4,7 @@ from fastapi.params import Form
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from starlette.responses import RedirectResponse, JSONResponse
-from src.services.models import ModelService
-from src.services.datasets import DatasetService
-from src.services.rag import RAGService
+from src.dependencies import get_dataset_service, get_model_service
 from src.models.schemas import DatasetItem, ModelItem
 from src.config import settings
 
@@ -17,9 +15,8 @@ app = FastAPI(
     description=settings.APP_DESCRIPTION,
 )
 
-rag_service = RAGService()
-dataset_service = DatasetService(rag_service)
-model_service = ModelService(rag_service)
+dataset_service = get_dataset_service()
+model_service = get_model_service()
 
 search_results_cache = {}
 
@@ -57,7 +54,7 @@ async def add_dataset(dataset_id: str = Form(...)):
     )
 
     try:
-        embedding = rag_service.embedding_service.encode_dataset_item(mockup_item)
+        embedding = dataset_service.rag_service.embedding_service.encode_dataset_item(mockup_item)
         dataset_service.add_dataset(mockup_item, embedding)
     except ValueError as e:
         raise HTTPException(status_code=409, detail=str(e))
@@ -116,7 +113,7 @@ async def add_model(model_id: str = Form(...)):
     )
 
     try:
-        embedding = rag_service.embedding_service.encode_model_item(mockup_item)
+        embedding = model_service.rag_service.embedding_service.encode_model_item(mockup_item)
         model_service.add_model(mockup_item, embedding)
     except ValueError as e:
         raise HTTPException(status_code=409, detail=str(e))
