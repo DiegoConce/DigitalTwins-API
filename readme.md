@@ -1,16 +1,21 @@
-# Catalog Search API for the DigitalTwins project
+# Catalog Search API for DigitalTwins
 
-A Retrieval-Augmented Generation (RAG) system for semantically searching HuggingFace datasets and models using embeddings and optional LLM filtering.
+A Retrieval-Augmented Generation (RAG) system for semantically searching HuggingFace datasets and models using embeddings, with vector storage [**Qdrant**](https://qdrant.tech/documentation/overview/) and object storage [**MinIO**](https://charts.min.io/).
 
-![home](templates/home.png)
+![home](templates/img/home.png)
+
+---
 
 ## 📋 Overview
 
 This project provides a web-based search interface that allows users to:
-- Search through HuggingFace datasets and models using natural language queries
-- Add new datasets and models to the catalog
-- View search results ranked by semantic similarity
-- Leverage transformer-based embeddings for accurate content matching
+- **Search** datasets and models using natural language queries with semantic similarity
+- **Add** new datasets and models to the catalog (MinIO + Qdrant)
+- **View** catalog samples and search results
+- Use **transformer-based embeddings** for accurate content matching
+- Optionally apply **LLM filtering** for relevance refinement
+
+---
 
 ## 🏗️ Architecture
 
@@ -21,17 +26,22 @@ This project provides a web-based search interface that allows users to:
        │
        v
 ┌─────────────────┐
-│Embedding Service│ (Converts text to vectors)
+│Embedding Service│ (Jina v3 embeddings)
 └──────┬──────────┘
        │
        v
 ┌──────────────────┐
-│Similarity Ranker │ (Finds top-K matches)
+│  Qdrant Search   │ (Vector similarity)
 └──────┬───────────┘
        │
        v
 ┌──────────────────┐
-│   LLM Filter     │ (Optional refinement)
+│ MinIO Retrieval  │ (Object storage)
+└──────┬───────────┘
+       │
+       v
+┌──────────────────┐
+│   LLM Filter     │ (Optional - Llama 3.2)
 └──────┬───────────┘
        │
        v
@@ -40,369 +50,433 @@ This project provides a web-based search interface that allows users to:
 └──────────────────┘
 ```
 
+**Key Components:**
+- **FastAPI** - Web framework for API endpoints
+- **Qdrant** - Vector database for embeddings
+- **MinIO** - Object storage for metadata
+- **Jina Embeddings v3** - Text embedding model
+- **Llama 3.2** - Optional LLM for relevance filtering
+
+---
+
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- Python 3.8+
-- pip package manager
+- **Docker** and **Docker Compose** (recommended)
+- **OR** Python 3.8+ with pip (manual setup)
 - (Optional) CUDA-enabled GPU for faster inference
 - HuggingFace API token (for LLM filtering)
 
-### Installation
+---
 
-**1. Clone the repository**
+## 🐳 Docker Setup (Recommended)
+
+### 1. Clone the Repository
 
 ```bash
 git clone <repository-url>
 cd DigitalTwins-API
 ```
 
-**2. Create a virtual environment (recommended)**
+### 2. Prepare Data Files
+
+Ensure your `data/` directory contains:
+- `datasets_hg_embeddings_sm.csv`
+- `models_hg_embeddings_sm.csv`
+
+If you have a `data.zip`, extract it:
+
+```bash
+unzip data/data.zip -d data/
+```
+
+### 3. Configure Environment
+
+Create a `.env` file in the project root:
+
+```env
+# HuggingFace Token (required for LLM filtering)
+HUGGINGFACE_API_TOKEN=your_token_here
+
+# Device Configuration
+EMBEDDING_DEVICE=cpu
+LLM_DEVICE=cpu
+
+# MinIO Configuration (use default Docker values)
+MINIO_ENDPOINT=minio:9000
+MINIO_ACCESS_KEY=minioadmin
+MINIO_SECRET_KEY=minioadmin
+
+# Qdrant Configuration (use default Docker values)
+QDRANT_HOST=qdrant
+QDRANT_PORT=6333
+
+# Search Settings
+DEFAULT_TOP_K=3
+USE_LLM_FILTER=false
+```
+
+### 4. Start Services with Docker Compose
+
+```bash
+# Build and start all services (FastAPI, MinIO, Qdrant)
+docker-compose up --build
+
+# Or run in detached mode (background)
+docker-compose up -d --build
+```
+
+**Services will be available at:**
+- **API**: http://localhost:8000
+- **MinIO Console**: http://localhost:9001 (login: `minioadmin` / `minioadmin`)
+- **Qdrant Dashboard**: http://localhost:6333/dashboard
+
+### 5. Populate Data (One-Time Setup)
+
+After services are running, populate MinIO and Qdrant with your CSV data:
+
+```bash
+# If running in Docker
+docker-compose exec api python -m src.populate_data
+
+# Or if running locally
+python -m src.populate_data
+```
+
+This script reads the CSV files and populates both storage systems.
+
+### 6. Access the Application
+
+Open your browser and navigate to:
+- **Home**: http://localhost:8000
+- **API Docs**: http://localhost:8000/docs
+
+---
+
+## 💻 Manual Setup (Without Docker)
+
+### 1. Install Dependencies
 
 ```bash
 python -m venv venv
-source venv/bin/activate  # On Linux/Mac
+source venv/bin/activate  # Linux/Mac
 # or
-venv\Scripts\activate  # On Windows
-```
+venv\Scripts\activate  # Windows
 
-**3. Install dependencies**
-
-```bash
 pip install -r requirements.txt
 ```
 
-**4. Verify data files exist**
+### 2. Start External Services
 
-Ensure your data directory contains the CSV files:
-- `data/datasets_hg_embeddings_sm.csv`
-- `data/models_hg_embeddings_sm.csv`
+**Option A: Use Docker for MinIO and Qdrant only**
 
-**5. Start the application**
+```bash
+# Start just MinIO and Qdrant
+docker-compose up minio qdrant -d
+```
+
+**Option B: Install and run locally**
+
+- **MinIO**: https://min.io/download
+- **Qdrant**: https://qdrant.tech/documentation/quick-start/
+
+### 3. Configure Environment
+
+Update `.env` for local services:
+
+```env
+MINIO_ENDPOINT=localhost:9000
+QDRANT_HOST=localhost
+QDRANT_PORT=6333
+```
+
+### 4. Populate Data
+
+```bash
+python -m src.populate_data
+```
+
+### 5. Start the API
 
 ```bash
 uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-The application will be available at:
-- **Web Interface**: http://localhost:8000
-- **API Documentation (Swagger)**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
+---
 
-# 🐳 Docker Deployment
+## 📖 Using the Application
 
-1. **Build the Docker image and start the container**
-Using Docker Compose, you can build your image and start the container in one step:
-```bash
-sudo docker-compose up --build
-```
+### Web Interface
 
-2. **Run the container in the background (optional)**
--d runs the container detached, so it doesn’t block your terminal.
-```bash
-sudo docker compose up -d
-```
+#### 1. View Catalog Samples
 
-
-
-
-
-
-
-## 📖 Tutorial
-
-### 1. Accessing the Web Interface
-
-Navigate to `http://localhost:8000` in your browser. You'll see the home page with options to search and manage datasets and models.
-
-### 2. Viewing Catalogs
-
-**View Datasets:**
+**Datasets:**
 - Navigate to http://localhost:8000/datasets
-- Displays a random sample of 10 datasets from your catalog
+- Shows 10 random datasets from MinIO
 
-**View Models:**
+[![dataset_catalog](templates/img/datasets_catalog.png)](templates/img/datasets_catalog.png)
+
+**Models:**
 - Navigate to http://localhost:8000/models
-- Displays a random sample of 10 models from your catalog
+- Shows 10 random models from MinIO
 
-### 3. Adding New Datasets
+#### 2. Search Datasets or Models
 
-**Via API:**
+1. Go to http://localhost:8000/
+2. Enter a natural language query (e.g., "sentiment analysis dataset in English" or "text generation model")
+3. Click "Search"
+4. View results ranked by semantic similarity
 
+[![dataset_search](templates/img/dataset_search_result.png)](templates/img/dataset_search_result.png)
+
+
+### API Endpoints
+
+#### Datasets
+
+**Get Sample:**
 ```bash
-curl -X POST "http://localhost:8000/datasets/add" \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "dataset_id=my-sentiment-dataset"
+GET http://localhost:8000/datasets
 ```
 
-**Response:**
-```json
-{
-  "message": "Dataset added successfully",
-  "dataset_id": "my-sentiment-dataset"
-}
-```
-
-**Note**: Currently creates a mockup dataset with predefined attributes for testing.
-
-### 4. Adding New Models
-
-**Via API:**
-
+**Search:**
 ```bash
-curl -X POST "http://localhost:8000/models/add" \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "model_id=my-text-generation-model"
+POST http://localhost:8000/search/datasets
+Content-Type: application/x-www-form-urlencoded
+
+description=sentiment analysis
 ```
 
-**Response:**
-```json
-{
-  "message": "Model added successfully",
-  "model_id": "my-text-generation-model"
-}
-```
-
-### 5. Searching Datasets
-
-**Via API:**
-
-Step 1: Submit search query
+**Add Dataset:**
 ```bash
-curl -X POST "http://localhost:8000/search/datasets" \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "description=sentiment analysis dataset in English"
+POST http://localhost:8000/datasets/add
+Content-Type: application/x-www-form-urlencoded
+
+dataset_id=my-sentiment-dataset
 ```
 
-Returns a redirect (303) to `/search/datasets/{search_id}`
+#### Models
 
-Step 2: Get results
+**Get Sample:**
 ```bash
-curl -X GET "http://localhost:8000/search/datasets/{search_id}"
+GET http://localhost:8000/models
 ```
 
-**Example Response:**
-```json
-{
-  "results": [
-    {
-      "dataset_id": "imdb-reviews",
-      "author": "stanford",
-      "created_at": "2020-01-15",
-      "readme_file": "Large movie review dataset...",
-      "downloads": 15000,
-      "likes": 250,
-      "tags": ["sentiment", "text-classification"],
-      "language": ["en"],
-      "license": "apache-2.0",
-      "multilinguality": ["monolingual"],
-      "size_categories": ["10K<n<100K"],
-      "task_categories": ["text-classification"]
-    }
-  ]
-}
-```
-
-### 6. Searching Models
-
-**Via API:**
-
+**Search:**
 ```bash
-# Step 1: Submit search
-curl -X POST "http://localhost:8000/search/models" \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "description=text generation model for code"
+POST http://localhost:8000/search/models
+Content-Type: application/x-www-form-urlencoded
 
-# Step 2: Get results (use search_id from redirect)
-curl -X GET "http://localhost:8000/search/models/{search_id}"
+description=text generation model
 ```
 
+**Add Model:**
+```bash
+POST http://localhost:8000/models/add
+Content-Type: application/x-www-form-urlencoded
+
+model_id=my-gpt-model
+```
+
+---
 
 ## 🔧 Configuration
 
-### Device Selection
+### Environment Variables
 
-Configure compute devices in `.env`:
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `HUGGINGFACE_API_TOKEN` | - | Required for LLM filtering |
+| `EMBEDDING_DEVICE` | `cpu` | `cpu`, `cuda`, or `auto` |
+| `LLM_DEVICE` | `cpu` | `cpu`, `cuda`, or `auto` |
+| `DEFAULT_TOP_K` | `3` | Number of search results |
+| `USE_LLM_FILTER` | `false` | Enable LLM relevance filtering |
+| `MINIO_ENDPOINT` | `localhost:9000` | MinIO server address |
+| `QDRANT_HOST` | `localhost` | Qdrant server address |
 
-```env
-# Use CUDA if available, otherwise CPU
-EMBEDDING_DEVICE="auto"
-LLM_DEVICE="auto"
+### GPU Acceleration
 
-# Force CPU
-EMBEDDING_DEVICE="cpu"
-LLM_DEVICE="cpu"
-
-# Force CUDA (requires CUDA-enabled GPU)
-EMBEDDING_DEVICE="cuda"
-LLM_DEVICE="cuda"
-```
-
-### Search Parameters
+To use GPU (requires CUDA):
 
 ```env
-# Number of results to return
-DEFAULT_TOP_K=10
-
-# Change embedding model
-EMBEDDING_MODEL_NAME="sentence-transformers/all-MiniLM-L6-v2"
-
-# Change LLM for filtering
-LANGUAGE_MODEL_NAME="microsoft/phi-2"
+EMBEDDING_DEVICE=cuda
+LLM_DEVICE=cuda
 ```
+
+Or use auto-detection:
+
+```env
+EMBEDDING_DEVICE=auto
+LLM_DEVICE=auto
+```
+
+---
 
 ## 📁 Project Structure
 
 ```
 DigitalTwins-API/
-├── data/                       # Root-level data folder
-│   ├── data.zip                # Unpack this to get datasets/models CSVs
+├── data/                           # CSV files with embeddings
+│   ├── datasets_hg_embeddings_sm.csv
+│   └── models_hg_embeddings_sm.csv
 ├── src/
-│   ├── main.py                 # FastAPI application & endpoints
-│   ├── config.py               # Configuration management
+│   ├── main.py                     # FastAPI application
+│   ├── config.py                   # Configuration settings
+│   ├── dependencies.py             # Dependency injection
+│   ├── populate_data.py            # Data population script
 │   ├── models/
-│   │   └── schemas.py          # Pydantic models
+│   │   └── schemas.py              # Pydantic models
 │   └── services/
-│       ├── rag.py              # RAG pipeline components
-│       ├── datasets.py         # Dataset management
-│       └── models.py           # Model management
-├── templates/                  # Jinja2 HTML templates
+│       ├── rag.py                  # RAG pipeline
+│       ├── datasets.py             # Dataset business logic
+│       ├── models.py               # Model business logic
+│       ├── storage.py              # MinIO storage service
+│       └── vectordb.py             # Qdrant vector DB service
+├── templates/                      # HTML templates
 │   ├── index.html
 │   ├── datasets.html
-│   └── models.html
+│   ├── models.html
+│   ├── results_dataset.html
 │   └── results_model.html
-│   └── results_dataset.html
-├── data/
-│   ├── datasets_hg_embeddings_sm.csv  # Dataset catalog
-│   └── models_hg_embeddings_sm.csv    # Model catalog
-├── requirements.txt            # Python dependencies
-├── test_main.http              # HTTP test requests
-└── readme.md                   # This file
-└── Dockerfile                  # Dockerfile for containerization
-└── docker-compose.yaml         # Docker Compose configuration
+├── docker-compose.yaml             # Docker services configuration
+├── Dockerfile                      # API container definition
+├── requirements.txt                # Python dependencies
+└── readme.md                       # This file
 ```
 
-## 🔌 API Endpoints
+---
 
-### Datasets
+## 🧹 Maintenance
 
-- `GET /datasets` - View datasets page (HTML)
-- `POST /datasets/add` - Add a new dataset
-- `POST /search/datasets` - Search datasets by description
-- `GET /search/datasets/{search_id}` - Get search results
+### View MinIO Data
 
-### Models
+Access MinIO Console at http://localhost:9001
 
-- `GET /models` - View models page (HTML)
-- `POST /models/add` - Add a new model
-- `POST /search/models` - Search models by description
-- `GET /search/models/{search_id}` - Get search results
+**Credentials:** `minioadmin` / `minioadmin`
 
-### General
+**Buckets:**
+- `datasets` - Dataset metadata and embeddings
+- `models` - Model metadata and embeddings
 
-- `GET /` - Home page
-- `GET /docs` - Interactive API documentation (Swagger UI)
-- `GET /redoc` - Alternative API documentation (ReDoc)
+**Structure:**
+```
+datasets/
+  author/dataset_id/
+    metadata.json
+    embedding.npy
+
+models/
+  author/model_id/
+    metadata.json
+    embedding.npy
+```
+
+### View Qdrant Data
+
+Access Qdrant Dashboard at http://localhost:6333/dashboard
+
+**Collections:**
+- `datasets` - Dataset embeddings (1024-dim)
+- `models` - Model embeddings (1024-dim)
+
+### Clear All Data
+
+```bash
+# Stop services
+docker-compose down
+
+# Remove volumes (deletes all data)
+docker-compose down -v
+
+# Restart and repopulate
+docker-compose up -d --build
+docker-compose exec api python -m src.populate_data
+```
+
+---
 
 ## ⚠️ Troubleshooting
 
-### CUDA Out of Memory
+### Services Won't Start
 
-**Solution**: Switch to CPU or use smaller models
-
-```env
-EMBEDDING_DEVICE="cpu"
-LLM_DEVICE="cpu"
-```
-
-### Model Download Fails
-
-**Solution**: Check internet connection and authenticate
-
+**Check logs:**
 ```bash
-huggingface-cli login
+docker-compose logs -f
 ```
 
-Or set your token in `.env`:
-```env
-HUGGINGFACE_API_TOKEN="your_token_here"
-```
+**Common issues:**
+- Port conflicts (8000, 9000, 9001, 6333)
+- Insufficient disk space
+- Docker daemon not running
 
 ### Empty Search Results
 
-**Solutions**:
-1. Verify CSV files contain data with embeddings
-2. Check embedding dimensions match between query and stored embeddings
-3. Ensure query is relevant to catalog content
-4. Check that embeddings column contains valid data
+**Possible causes:**
+1. Data not populated - run `python -m src.populate_data`
+2. Wrong endpoint configuration in `.env`
+3. MinIO buckets empty - check console at http://localhost:9001
+4. Qdrant collections empty - check dashboard at http://localhost:6333/dashboard
 
-### Slow Search Performance
+### CUDA Out of Memory
 
-**Solutions**:
-1. Reduce `DEFAULT_TOP_K` value (e.g., from 10 to 5)
-2. Disable LLM filtering by commenting out that step in `rag.py`
-3. Use GPU acceleration by setting `EMBEDDING_DEVICE="cuda"`
-4. Use smaller/faster embedding models
-
-### Import Errors
-
-**Solution**: Ensure all dependencies are installed
-
-```bash
-pip install -r requirements.txt
+```env
+EMBEDDING_DEVICE=cpu
+LLM_DEVICE=cpu
 ```
 
-### Port Already in Use
+### Slow Performance
 
-**Solution**: Change the port or kill the process using port 8000
+**Optimizations:**
+1. Reduce `DEFAULT_TOP_K` (e.g., from 10 to 3)
+2. Disable LLM filtering: `USE_LLM_FILTER=false`
+3. Use GPU: `EMBEDDING_DEVICE=cuda`
+4. Use smaller embedding model in `config.py`
 
-```bash
-# Find process using port 8000
-lsof -i :8000
-
-# Kill the process
-kill -9 <PID>
-
-# Or use a different port
-uvicorn src.main:app --reload --port 8080
-```
+---
 
 ## 🧪 Testing
 
 ### Using test_main.http
 
-The project includes a `test_main.http` file for testing endpoints. Use it with HTTP client tools like:
-- JetBrains HTTP Client (built into PyCharm/IntelliJ)
-- REST Client extension for VS Code
+Use HTTP client tools (PyCharm HTTP Client, VS Code REST Client):
+
+```http
+### Get datasets sample
+GET http://localhost:8000/datasets
+
+### Search datasets
+POST http://localhost:8000/search/datasets
+Content-Type: application/x-www-form-urlencoded
+
+description=sentiment analysis dataset
+```
 
 ### Manual Testing
 
 ```bash
-# Test health check
+# Test health
 curl http://localhost:8000/
 
-# Test dataset addition
+# Add dataset
 curl -X POST "http://localhost:8000/datasets/add" \
   -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "dataset_id=test-dataset-$(date +%s)"
+  -d "dataset_id=test-dataset-123"
 
-# Test search
+# Search
 curl -X POST "http://localhost:8000/search/datasets" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "description=sentiment analysis"
 ```
 
-### Load Testing
+---
 
-Test multiple concurrent searches:
+## 🛑 Stopping the Application
 
 ```bash
-for i in {1..10}; do
-  curl -X POST "http://localhost:8000/search/datasets" \
-    -H "Content-Type: application/x-www-form-urlencoded" \
-    -d "description=sentiment analysis" &
-done
-wait
-```
+# Stop services
+docker-compose down
 
+# Stop and remove volumes (deletes all data)
+docker-compose down -v
+```
