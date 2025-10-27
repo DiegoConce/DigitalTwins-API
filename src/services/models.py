@@ -1,7 +1,7 @@
 import ast
 import numpy as np
 from src.models.schemas import ModelItem
-from typing import List
+from typing import List, Optional
 from src.services.storage import StorageService
 from src.services.vectordb import QdrantService
 from src.services import rag
@@ -29,8 +29,7 @@ class ModelService:
 
         return [self.dict_to_model_item(metadata) for metadata in results]
 
-
-    def add_model(self, item: ModelItem, embedding: np.array) -> None:
+    def add_model(self, item: ModelItem, embedding: np.array, weights: Optional[List[bytes]] = None) -> None:
         """Add a new model to the catalog."""
         model_id = item.author + "/" + item.model_id
 
@@ -56,7 +55,7 @@ class ModelService:
         }
 
         # Store metadata in MinIO
-        self.storage_service.store_model(model_id, metadata, embedding)
+        self.storage_service.store_model(model_id, metadata, weight_files=weights)
 
         # Add model to Qdrant vector DB
         self.qdrant_service.upsert_model(model_id, embedding)

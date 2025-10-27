@@ -304,10 +304,14 @@
                     </p>
                     {% endif %}
                 </div>
-                <button class="download-btn">
+                <a
+                        class="download-btn"
+                        href="/models/{{ item.model_id }}/weights"
+                        download="{{ item.model_id.replace('/', '-') }}_data.txt">
                     <span>⬇️</span>
                     <span>Download</span>
-                </button>
+                </a>
+
             </div>
 
             {% if item.readme_file %}

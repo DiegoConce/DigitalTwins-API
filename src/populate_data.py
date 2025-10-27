@@ -1,17 +1,19 @@
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
-from src.dependencies import get_qdrant_service, get_storage_service, get_rag_service
+from src.dependencies import get_qdrant_service, get_storage_service
 
 
 def bulk_populate_datasets(csv_path: str):
     """Populate both MinIO and Qdrant with datasets from CSV."""
     qdrant_service = get_qdrant_service()
     storage_service = get_storage_service()
-    rag_service = get_rag_service()
 
     df = pd.read_csv(csv_path)
     print(f"Loading {len(df)} datasets from CSV...")
+
+    placeholder_file = (b"This is a placeholder file. "
+                        b"It is used to represent a dataset file or a weight file for a model.")
 
     for _, row in tqdm(df.iterrows(), total=len(df), desc="Populating datasets"):
         try:
@@ -22,7 +24,7 @@ def bulk_populate_datasets(csv_path: str):
             embedding = np.fromstring(row['embeddings'][1:-1], sep=',').astype(np.float32)
 
             # Store in MinIO
-            storage_service.store_dataset(dataset_id, metadata, embedding)
+            storage_service.store_dataset(dataset_id, metadata, sample_files=[placeholder_file])
 
             # Store in Qdrant
             qdrant_service.upsert_dataset(dataset_id, embedding)
@@ -37,10 +39,12 @@ def bulk_populate_models(csv_path: str):
     """Populate both MinIO and Qdrant with models from CSV."""
     qdrant_service = get_qdrant_service()
     storage_service = get_storage_service()
-    rag_service = get_rag_service()
 
     df = pd.read_csv(csv_path)
     print(f"Loading {len(df)} models from CSV...")
+
+    placeholder_file = (b"This is a placeholder file. "
+                        b"It is used to represent a dataset file or a weight file for a model.")
 
     for _, row in tqdm(df.iterrows(), total=len(df), desc="Populating models"):
         try:
@@ -51,7 +55,7 @@ def bulk_populate_models(csv_path: str):
             embedding = np.fromstring(row['embeddings'][1:-1], sep=',').astype(np.float32)
 
             # Store in MinIO
-            storage_service.store_model(model_id, metadata, embedding)
+            storage_service.store_model(model_id, metadata, weight_files=[placeholder_file])
 
             # Store in Qdrant
             qdrant_service.upsert_model(model_id, embedding)

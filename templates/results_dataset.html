@@ -304,10 +304,14 @@
                     </p>
                     {% endif %}
                 </div>
-                <button class="download-btn">
+                <a
+                        class="download-btn"
+                        href="/datasets/{{ item.dataset_id }}/data"
+                        download="{{ item.dataset_id.replace('/', '-') }}_data.txt">
                     <span>⬇️</span>
                     <span>Download</span>
-                </button>
+                </a>
+
             </div>
 
             {% if item.readme_file %}
@@ -355,21 +359,27 @@
                 {% if item.multilinguality %}
                 <div class="metadata-item">
                     <div class="metadata-label">Multilinguality</div>
-                    <div class="metadata-value">{{ item.multilinguality|join(', ') if item.multilinguality else 'N/A' }}</div>
+                    <div class="metadata-value">{{ item.multilinguality|join(', ') if item.multilinguality else 'N/A'
+                        }}
+                    </div>
                 </div>
                 {% endif %}
 
                 {% if item.size_categories %}
                 <div class="metadata-item">
                     <div class="metadata-label">Size</div>
-                    <div class="metadata-value">{{ item.size_categories|join(', ') if item.size_categories else 'N/A' }}</div>
+                    <div class="metadata-value">{{ item.size_categories|join(', ') if item.size_categories else 'N/A'
+                        }}
+                    </div>
                 </div>
                 {% endif %}
 
                 {% if item.task_categories %}
                 <div class="metadata-item">
                     <div class="metadata-label">Task Categories</div>
-                    <div class="metadata-value">{{ item.task_categories|join(', ') if item.task_categories else 'N/A' }}</div>
+                    <div class="metadata-value">{{ item.task_categories|join(', ') if item.task_categories else 'N/A'
+                        }}
+                    </div>
                 </div>
                 {% endif %}
             </div>

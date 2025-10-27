@@ -45,19 +45,6 @@ class StorageService:
         except S3Error:
             return None
 
-    def _put_numpy_array(self, bucket: str, object_name: str, array: np.ndarray) -> None:
-        """Helper to store numpy array"""
-        with io.BytesIO() as buffer:
-            np.save(buffer, array)
-            buffer.seek(0)
-            self.client.put_object(
-                bucket,
-                object_name,
-                buffer,
-                buffer.getbuffer().nbytes,
-                content_type="application/octet-stream"
-            )
-
     def _get_numpy_array(self, bucket: str, object_name: str) -> Optional[np.ndarray]:
         """Helper to retrieve numpy array"""
         try:
@@ -67,8 +54,7 @@ class StorageService:
             return None
 
     # Dataset Operations
-    def store_dataset(self, dataset_id: str, metadata: dict, embedding: np.ndarray,
-                      sample_files: Optional[List[bytes]] = None) -> None:
+    def store_dataset(self, dataset_id: str, metadata: dict, sample_files: Optional[List[bytes]] = None) -> None:
 
         """Store complete dataset information"""
         metadata_with_timestamp = {
@@ -83,18 +69,12 @@ class StorageService:
             metadata_with_timestamp
         )
 
-        self._put_numpy_array(
-            self.datasets_bucket,
-            f"{dataset_id}/embedding.npy",
-            np.array(embedding)
-        )
-
         # Optional sample files in data/
         if sample_files:
             for idx, file_bytes in enumerate(sample_files):
                 self.client.put_object(
                     self.datasets_bucket,
-                    f"{dataset_id}/data/sample_{idx}.txt",
+                    f"{dataset_id}/data/placeholder.txt",
                     io.BytesIO(file_bytes),
                     len(file_bytes),
                     content_type="text/plain"
@@ -148,8 +128,7 @@ class StorageService:
         )
         return metadata
 
-    def store_model(self, model_id: str, metadata: dict, embedding: np.ndarray,
-                    weight_files: Optional[List[bytes]] = None) -> None:
+    def store_model(self, model_id: str, metadata: dict, weight_files: Optional[List[bytes]] = None) -> None:
 
         """Store complete model information"""
         metadata_with_timestamp = {
@@ -164,18 +143,12 @@ class StorageService:
             metadata_with_timestamp
         )
 
-        self._put_numpy_array(
-            self.models_bucket,
-            f"{model_id}/embedding.npy",
-            np.array(embedding)
-        )
-
         # Optional weights in weights/
         if weight_files:
             for idx, file_bytes in enumerate(weight_files):
                 self.client.put_object(
                     self.models_bucket,
-                    f"{model_id}/weights/weight_{idx}.txt",
+                    f"{model_id}/weights/placeholder.txt",
                     io.BytesIO(file_bytes),
                     len(file_bytes),
                     content_type="text/plain"

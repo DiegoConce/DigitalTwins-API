@@ -17,11 +17,17 @@ Accept: application/json
 dataset_id = my-new-dataset-diego
 
 ### Search datasets
-POST {{baseUrl}}/datasets/search
+POST {{baseUrl}}/search/datasets
 Content-Type: application/x-www-form-urlencoded
 Accept: application/json
 
 description = sentiment analysis
+
+### Download dataset file
+@dataset_id = nbroad/mediasum
+GET {{baseUrl}}/datasets/{{dataset_id}}/data
+Accept: text/plain
+
 
 ### Sample Models
 GET {{baseUrl}}/models
@@ -34,9 +40,27 @@ Accept: application/json
 model_id = my-new-model-diego
 
 ### Search models
-POST {{baseUrl}}/models/search
+POST {{baseUrl}}/search/models
 Content-Type: application/x-www-form-urlencoded
 Accept: application/json
 
 description = text classification
 
+### Download model file
+@model_id = binwang/RSE-BERT-base-STS
+GET {{baseUrl}}/models/{{model_id}}/weights
+
+
+### Api Search for models
+POST {{baseUrl}}/api/search/models
+Content-Type: application/x-www-form-urlencoded
+Accept: application/json
+
+description = text classification
+
+### Api Search for datasets
+POST {{baseUrl}}/api/search/datasets
+Content-Type: application/x-www-form-urlencoded
+Accept: application/json
+
+description = sentiment analysis

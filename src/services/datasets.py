@@ -4,7 +4,7 @@ from src.models.schemas import DatasetItem
 from src.services import rag
 from src.services.storage import StorageService
 from src.services.vectordb import QdrantService
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 
 class DatasetService:
@@ -30,7 +30,7 @@ class DatasetService:
 
         return [self.dict_to_dataset_item(metadata) for metadata in results]
 
-    def add_dataset(self, item: DatasetItem, embedding: np.ndarray) -> None:
+    def add_dataset(self, item: DatasetItem, embedding: np.ndarray, data: Optional[List[bytes]] = None) -> None:
         """Add a new dataset to the catalog."""
         dataset_id = item.author + "/" + item.dataset_id
 
@@ -56,11 +56,10 @@ class DatasetService:
         }
 
         # Store metadata in MinIO
-        self.storage_service.store_dataset(dataset_id, metadata, embedding)
+        self.storage_service.store_dataset(dataset_id, metadata, sample_files=data)
 
         # Store embedding in Qdrant
         self.qdrant_service.upsert_dataset(dataset_id, embedding)
-
 
     @staticmethod
     def dict_to_dataset_item(metadata: Dict) -> DatasetItem:
@@ -113,4 +112,3 @@ class DatasetService:
             size_categories=ensure_list(metadata.get("size_categories")),
             task_categories=ensure_list(metadata.get("task_categories"))
         )
-
