@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Dataset - Catalog Search API</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+            background: #fafafa;
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        .hero {
+            background: linear-gradient(165deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+            padding: 60px 24px 100px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: #fafafa;
+            clip-path: polygon(0 50%, 100% 0, 100% 100%, 0 100%);
+        }
+
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 24px;
+            padding: 10px 20px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(-4px);
+        }
+
+        h1 {
+            color: white;
+            font-size: 2.5em;
+            font-weight: 800;
+            margin-bottom: 12px;
+            letter-spacing: -0.03em;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 1.1em;
+            font-weight: 400;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: -60px auto 60px;
+            padding: 0 24px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 20px;
+            padding: 48px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .message {
+            padding: 16px 20px;
+            margin-bottom: 28px;
+            border-radius: 12px;
+            display: none;
+            font-weight: 500;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+            border: 2px solid #28a745;
+        }
+
+        .message.error {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            color: #721c24;
+            border: 2px solid #dc3545;
+        }
+
+        .form-group {
+            margin-bottom: 28px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 700;
+            color: #111827;
+            font-size: 0.95em;
+            letter-spacing: -0.01em;
+        }
+
+        .required {
+            color: #dc2626;
+            margin-left: 4px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: all 0.2s;
+            background: #fafafa;
+            color: #111827;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #6366f1;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        input[type="text"]::placeholder,
+        textarea::placeholder {
+            color: #9ca3af;
+        }
+
+        .char-counter {
+            text-align: right;
+            font-size: 0.8em;
+            color: #6b7280;
+            margin-top: 6px;
+        }
+
+        .char-counter.warning {
+            color: #f59e0b;
+        }
+
+        .char-counter.error {
+            color: #dc2626;
+        }
+
+        .hint {
+            margin-top: 8px;
+            font-size: 0.85em;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .file-upload {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 16px 20px;
+            background: #fafafa;
+            border: 2px dashed #e5e7eb;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+            color: #6b7280;
+        }
+
+        .file-input-label:hover {
+            border-color: #6366f1;
+            background: #f5f3ff;
+            color: #6366f1;
+        }
+
+        input[type="file"] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-name {
+            padding: 12px 16px;
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            color: #0c4a6e;
+            font-size: 0.9em;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .file-name.show {
+            display: flex;
+        }
+
+        .remove-file {
+            margin-left: auto;
+            background: none;
+            border: none;
+            color: #dc2626;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .remove-file:hover {
+            background: #fee2e2;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 16px 32px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.05em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        button[type="submit"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        button[type="submit"]:active {
+            transform: translateY(0);
+        }
+
+        button[type="submit"]:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.6s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                padding: 40px 20px 80px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .form-card {
+                padding: 32px 24px;
+            }
+
+            .container {
+                margin-top: -50px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="hero">
+    <div class="hero-content">
+        <a href="/" class="back-btn">← Back to Home</a>
+        <h1>📊Add New Dataset</h1>
+        <p class="subtitle">Expand the catalog with a new dataset</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="form-card">
+        <div id="message" class="message"></div>
+
+        <form id="addDatasetForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="dataset_id">Dataset ID<span class="required">*</span></label>
+                <div class="input-wrapper">
+                    <input
+                            type="text"
+                            id="dataset_id"
+                            name="dataset_id"
+                            placeholder="e.g., username/dataset-name"
+                            required
+                            pattern="^[a-zA-Z0-9_-]+/[a-zA-Z0-9._-]+$"
+                            title="Must be in the format {author}/{name} (e.g. username/dataset-name)"
+                    >
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="readme_file">README Description<span class="required">*</span></label>
+                <div class="input-wrapper">
+                    <textarea
+                            id="readme_file"
+                            name="readme_file"
+                            maxlength="300"
+                            placeholder="Describe your dataset..."
+                            required
+                    ></textarea>
+                </div>
+                <div class="char-counter" id="charCounter">0 / 300</div>
+            </div>
+
+            <div class="form-group">
+                <label for="tags">Tags<span class="required">*</span></label>
+                <div class="input-wrapper">
+                    <input
+                            type="text"
+                            id="tags"
+                            name="tags"
+                            placeholder="machine-learning, nlp, classification"
+                            required
+                    >
+                </div>
+                <p class="hint">
+                    <span>🏷️</span>
+                    <span>Separate tags with commas</span>
+                </p>
+            </div>
+
+            <div class="form-group">
+                <label for="language">Language<span class="required">*</span></label>
+                <div class="input-wrapper">
+                    <input
+                            type="text"
+                            id="language"
+                            name="language"
+                            placeholder="en, es, fr"
+                            required
+                    >
+                </div>
+                <p class="hint">
+                    <span>🌍</span>
+                    <span>Separate languages with commas (use ISO codes)</span>
+                </p>
+            </div>
+
+            <div class="form-group">
+                <label for="file">Upload Dataset File<span class="required">*</span></label>
+                <div class="file-upload">
+                    <div class="file-input-wrapper">
+                        <label for="file" class="file-input-label" id="fileLabel">
+                            <span>📎</span>
+                            <span>Choose file or drag here</span>
+                        </label>
+                        <input
+                                type="file"
+                                id="file"
+                                name="file"
+                                accept=".txt"
+                                required
+                        >
+                    </div>
+                    <div class="file-name" id="fileName">
+                        <span>📄</span>
+                        <span id="fileNameText"></span>
+                        <button type="button" class="remove-file" id="removeFile">✕</button>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" id="submitBtn">
+                <span id="btnText">Add Dataset</span>
+                <span class="spinner" id="spinner"></span>
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const readmeTextarea = document.getElementById('readme_file');
+    const charCounter = document.getElementById('charCounter');
+    const fileInput = document.getElementById('file');
+    const fileLabel = document.getElementById('fileLabel');
+    const fileName = document.getElementById('fileName');
+    const fileNameText = document.getElementById('fileNameText');
+    const removeFileBtn = document.getElementById('removeFile');
+
+    // Character counter for README
+    readmeTextarea.addEventListener('input', () => {
+        const length = readmeTextarea.value.length;
+        charCounter.textContent = `${length} / 300`;
+
+        charCounter.classList.remove('warning', 'error');
+        if (length > 280) {
+            charCounter.classList.add('error');
+        } else if (length > 250) {
+            charCounter.classList.add('warning');
+        }
+    });
+
+    // File upload handling
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            if (!file.name.toLowerCase().endsWith('.txt')) {
+                alert('Only .txt files are allowed.');
+                fileInput.value = '';
+                return;
+            }
+            fileNameText.textContent = file.name;
+            fileName.classList.add('show');
+            fileLabel.style.display = 'none';
+        }
+    });
+
+    removeFileBtn.addEventListener('click', () => {
+        fileInput.value = '';
+        fileName.classList.remove('show');
+        fileLabel.style.display = 'flex';
+    });
+
+    const form = document.getElementById('addDatasetForm');
+    const datasetIdInput = document.getElementById('dataset_id');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const messageDiv = document.getElementById('message');
+        const submitBtn = document.getElementById('submitBtn');
+        const spinner = document.getElementById('spinner');
+
+        // 1️⃣ Validate dataset ID before submitting
+        const pattern = /^[a-zA-Z0-9_-]+\/[a-zA-Z0-9._-]+$/;
+        if (!pattern.test(datasetIdInput.value)) {
+            messageDiv.textContent = '✕ Dataset ID must be in the format {author}/{name} (e.g. username/dataset-name)';
+            messageDiv.className = 'message error';
+            messageDiv.style.display = 'block';
+            datasetIdInput.focus();
+            return;
+        }
+
+        // 2️⃣ Continue if valid
+        submitBtn.disabled = true;
+        spinner.style.display = 'inline-block';
+        messageDiv.style.display = 'none';
+
+        const formData = new FormData();
+        formData.append('dataset_id', datasetIdInput.value);
+        formData.append('readme_file', document.getElementById('readme_file').value);
+        formData.append('tags', document.getElementById('tags').value);
+        formData.append('language', document.getElementById('language').value);
+        formData.append('file', document.getElementById('file').files[0]);
+
+        try {
+            const response = await fetch('/datasets/add', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                messageDiv.textContent = '✓ ' + data.message;
+                messageDiv.className = 'message success';
+                messageDiv.style.display = 'block';
+                form.reset();
+                charCounter.textContent = '0 / 300';
+                fileName.classList.remove('show');
+                fileLabel.style.display = 'flex';
+            } else {
+                messageDiv.textContent = '✕ ' + (data.detail || 'An error occurred');
+                messageDiv.className = 'message error';
+                messageDiv.style.display = 'block';
+            }
+        } catch (error) {
+            messageDiv.textContent = '✕ Failed to add dataset: ' + error.message;
+            messageDiv.className = 'message error';
+            messageDiv.style.display = 'block';
+        } finally {
+            submitBtn.disabled = false;
+            spinner.style.display = 'none';
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 import uuid
-from fastapi import FastAPI, Request, HTTPException
-from fastapi.params import Form
+from fastapi import FastAPI, Request, HTTPException, UploadFile
+from fastapi.params import Form, File
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from minio import S3Error
@@ -36,30 +36,47 @@ async def view_datasets(request: Request):
     })
 
 
+@app.get("/datasets/add", response_class=HTMLResponse)
+async def show_add_dataset_form(request: Request):
+    return templates.TemplateResponse("add_dataset.html", {"request": request})
+
+
 @app.post("/datasets/add")
-async def add_dataset(dataset_id: str = Form(...)):
-    # Create a mockup dataset item
-    mockup_item = DatasetItem(
-        dataset_id=dataset_id,
-        author="diego",
+async def add_dataset(
+        dataset_id: str = Form(...),
+        readme_file: str = Form(...),
+        tags: str = Form(...),
+        language: str = Form(...),
+        file: UploadFile = File(...)
+):
+    # Parse comma-separated values
+    tags_list = [tag.strip() for tag in tags.split(",")]
+    language_list = [lang.strip() for lang in language.split(",")]
+
+    # Read file content
+    file_content = await file.read()
+
+    # Split the dataset_id
+    name, author = dataset_id.split("/")
+
+    dataset_item = DatasetItem(
+        dataset_id=name,
+        author=author,
         created_at="2024-01-01",
-        readme_file="This is a mock dataset for testing purposes.",
+        readme_file=readme_file,
         downloads=0,
         likes=0,
-        tags=["mock", "test"],
-        language=["en"],
+        tags=tags_list,
+        language=language_list,
         license="mit",
         multilinguality=["monolingual"],
         size_categories=["1K<n<10K"],
         task_categories=["text-classification"]
     )
 
-    mock_txt_file = (b"This is a placeholder file. "
-                     b"It is used to represent a dataset file or a weight file for a model.")
-
     try:
-        embedding = dataset_service.rag_service.embedding_service.encode_dataset_item(mockup_item)
-        dataset_service.add_dataset(mockup_item, embedding, data=[mock_txt_file])
+        embedding = dataset_service.rag_service.embedding_service.encode_dataset_item(dataset_item)
+        dataset_service.add_dataset(dataset_item, embedding, data=[file_content])
     except ValueError as e:
         raise HTTPException(status_code=409, detail=str(e))
 
@@ -117,30 +134,48 @@ async def view_models(request: Request):
     })
 
 
+@app.get("/models/add", response_class=HTMLResponse)
+async def show_add_model_form(request: Request):
+    return templates.TemplateResponse("add_model.html", {"request": request})
+
+
 @app.post("/models/add")
-async def add_model(model_id: str = Form(...)):
+async def add_model(
+        model_id: str = Form(...),
+        readme_file: str = Form(...),
+        tags: str = Form(...),
+        language: str = Form(...),
+        file: UploadFile = File(...)
+):
+    # Parse comma-separated values
+    tags_list = [tag.strip() for tag in tags.split(",")]
+    language_list = [lang.strip() for lang in language.split(",")]
+
+    # Read file content
+    file_content = await file.read()
+
+    # Split the model_id
+    name, author = model_id.split("/")
+
     # Create a mockup model item
-    mockup_item = ModelItem(
-        model_id=model_id,
+    model_item = ModelItem(
+        model_id=name,
         base_model="gpt-3",
-        author="diego",
-        readme_file="This is a mock model for testing purposes.",
+        author=author,
+        readme_file=readme_file,
         license="mit",
-        language=["en"],
+        language=language_list,
         downloads=0,
         likes=0,
-        tags=["mock", "test"],
+        tags=tags_list,
         pipeline_tag="text-generation",
         library_name="transformers",
         created_at="2024-01-01"
     )
 
-    mock_txt_file = (b"This is a placeholder file. "
-                     b"It is used to represent a dataset file or a weight file for a model.")
-
     try:
-        embedding = model_service.rag_service.embedding_service.encode_model_item(mockup_item)
-        model_service.add_model(mockup_item, embedding, weights=[mock_txt_file])
+        embedding = model_service.rag_service.embedding_service.encode_model_item(model_item)
+        model_service.add_model(model_item, embedding, weights=[file_content])
     except ValueError as e:
         raise HTTPException(status_code=409, detail=str(e))
 

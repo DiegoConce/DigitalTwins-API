@@ -322,6 +322,81 @@
             box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
         }
 
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .action-btn {
+            background: white;
+            border-radius: 16px;
+            padding: 28px;
+            text-decoration: none;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+        }
+
+        .action-btn.add-dataset:hover {
+            border-color: #6366f1;
+        }
+
+        .action-btn.add-model:hover {
+            border-color: #ec4899;
+        }
+
+        .action-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+
+        .add-dataset .action-icon {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        }
+
+        .add-model .action-icon {
+            background: linear-gradient(135deg, #ec4899 0%, #f43f5e 100%);
+        }
+
+        .action-content {
+            flex: 1;
+        }
+
+        .action-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+
+        .action-subtitle {
+            font-size: 0.9em;
+            color: #6b7280;
+        }
+
+        @media (max-width: 768px) {
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+
+
         @media (max-width: 768px) {
             h1 {
                 font-size: 2.5em;
@@ -452,7 +527,22 @@
             </a>
         </div>
     </div>
-
+    <div class="action-buttons">
+        <a href="/datasets/add" class="action-btn add-dataset">
+            <span class="action-icon">📊</span>
+            <div class="action-content">
+                <div class="action-title">Add Dataset</div>
+                <div class="action-subtitle">Upload a new dataset to the catalog</div>
+            </div>
+        </a>
+        <a href="/models/add" class="action-btn add-model">
+            <span class="action-icon">🤖</span>
+            <div class="action-content">
+                <div class="action-title">Add Model</div>
+                <div class="action-subtitle">Upload a new model to the catalog</div>
+            </div>
+        </a>
+    </div>
     <div class="docs-section">
         <h2 class="docs-title">API Documentation</h2>
         <div class="docs-links">
