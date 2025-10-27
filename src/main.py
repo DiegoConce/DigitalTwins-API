@@ -268,3 +268,31 @@ async def api_search_models(description: str = Form(...)):
             for result in results
         ]
     })
+
+
+@app.delete("/api/datasets/{dataset_id:path}")
+async def delete_dataset(dataset_id: str):
+    """Delete a dataset by its ID."""
+    if not dataset_service.storage_service.get_dataset_by_id(dataset_id):
+        raise HTTPException(status_code=404, detail="Dataset not found")
+
+    success = dataset_service.delete_dataset(dataset_id)
+
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to delete dataset")
+
+    return JSONResponse(content={"message": "Dataset deleted successfully", "dataset_id": dataset_id})
+
+
+@app.delete("/api/models/{model_id:path}")
+async def delete_model(model_id: str):
+    """Delete a model by its ID."""
+    if not model_service.storage_service.get_model_by_id(model_id):
+        raise HTTPException(status_code=404, detail="Model not found")
+
+    success = model_service.delete_model(model_id)
+
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to delete model")
+
+    return JSONResponse(content={"message": "Model deleted successfully", "model_id": model_id})

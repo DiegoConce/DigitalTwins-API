@@ -68,8 +68,8 @@ def bulk_populate_models(csv_path: str):
 
 if __name__ == "__main__":
     # Update paths as needed
-    DATASETS_CSV = "/home/diego/Documenti/Workspace/DigitalTwins-API/data/datasets_hg_embeddings_sm.csv"
-    MODELS_CSV = "/home/diego/Documenti/Workspace/DigitalTwins-API/data/models_hg_embeddings_sm.csv"
+    DATASETS_CSV = "data/datasets_hg_embeddings_sm.csv"
+    MODELS_CSV = "data/models_hg_embeddings_sm.csv"
 
     bulk_populate_datasets(DATASETS_CSV)
     bulk_populate_models(MODELS_CSV)

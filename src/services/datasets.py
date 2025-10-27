@@ -61,6 +61,12 @@ class DatasetService:
         # Store embedding in Qdrant
         self.qdrant_service.upsert_dataset(dataset_id, embedding)
 
+    def delete_dataset(self, dataset_id: str) -> bool:
+        """Delete dataset from both storage and vector DB."""
+        storage_deleted = self.storage_service.delete_dataset_by_id(dataset_id)
+        vector_deleted = self.qdrant_service.delete_dataset_by_id(dataset_id)
+        return storage_deleted and vector_deleted
+
     @staticmethod
     def dict_to_dataset_item(metadata: Dict) -> DatasetItem:
         """Convert a metadata dictionary into a DatasetItem object."""

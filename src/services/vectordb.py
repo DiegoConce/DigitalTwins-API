@@ -70,6 +70,17 @@ class QdrantService:
             return result[0][0].payload
         return None
 
+    def delete_dataset_by_id(self, dataset_id: str) -> bool:
+        """Delete a dataset from the vector database."""
+        try:
+            self.client.delete(
+                collection_name=settings.QDRANT_DATASETS_COLLECTION,
+                points_selector=[make_qdrant_id(dataset_id)]
+            )
+            return True
+        except Exception:
+            return False
+
     def search_datasets(self, query_vector: np.ndarray, top_k) -> List[Dict]:
         """Search for similar datasets by vector similarity."""
         search_result = self.client.query_points(
@@ -115,6 +126,17 @@ class QdrantService:
             return result[0][0].payload
         return None
 
+    def delete_model_by_id(self, model_id: str) -> bool:
+        """Delete a model from the vector database."""
+        try:
+            self.client.delete(
+                collection_name=settings.QDRANT_MODELS_COLLECTION,
+                points_selector=[make_qdrant_id(model_id)]
+            )
+            return True
+        except Exception:
+            return False
+
     def search_models(self, query_vector: np.ndarray, top_k) -> List[Dict]:
         """Search for similar models by vector similarity."""
         search_result = self.client.query_points(
@@ -132,4 +154,3 @@ class QdrantService:
             }
             for hit in search_result.points
         ]
-

@@ -60,6 +60,12 @@ class ModelService:
         # Add model to Qdrant vector DB
         self.qdrant_service.upsert_model(model_id, embedding)
 
+    def delete_model(self, model_id: str) -> bool:
+        """Delete model from both storage and vector DB."""
+        storage_deleted = self.storage_service.delete_dataset_by_id(model_id)
+        vector_deleted = self.qdrant_service.delete_model_by_id(model_id)
+        return storage_deleted and vector_deleted
+
     @staticmethod
     def dict_to_model_item(metadata: dict) -> ModelItem:
         """Convert a metadata dictionary into a ModelItem object."""

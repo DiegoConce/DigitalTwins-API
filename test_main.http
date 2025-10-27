@@ -1,6 +1,9 @@
 # FastApi Route Tests
 
 @baseUrl = http://127.0.0.1:8000
+@model_id = binwang/RSE-BERT-base-STS
+@dataset_id = nbroad/mediasum
+
 
 ### Root
 GET {{baseUrl}}/
@@ -24,7 +27,6 @@ Accept: application/json
 description = sentiment analysis
 
 ### Download dataset file
-@dataset_id = nbroad/mediasum
 GET {{baseUrl}}/datasets/{{dataset_id}}/data
 Accept: text/plain
 
@@ -47,7 +49,6 @@ Accept: application/json
 description = text classification
 
 ### Download model file
-@model_id = binwang/RSE-BERT-base-STS
 GET {{baseUrl}}/models/{{model_id}}/weights
 
 
@@ -64,3 +65,11 @@ Content-Type: application/x-www-form-urlencoded
 Accept: application/json
 
 description = sentiment analysis
+
+### Delete a dataset item
+DELETE {{baseUrl}}/api/datasets/{{dataset_id}}
+Accept: application/json
+
+### Delete a model item
+DELETE {{baseUrl}}/api/models/{{model_id}}
+Accept: application/json

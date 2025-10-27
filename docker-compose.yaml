@@ -11,7 +11,7 @@ services:
       - MINIO_ROOT_USER=minioadmin
       - MINIO_ROOT_PASSWORD=minioadmin
     volumes:
-      - minio_storage:/data  # Use the existing Docker volume
+      - minio_storage:/data
     command: server /data --console-address ":9001"
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
@@ -64,7 +64,7 @@ services:
       - QDRANT_USE_HTTP=false
       - QDRANT_DATASETS_COLLECTION=datasets
       - QDRANT_MODELS_COLLECTION=models
-      - VECTOR_SIZE=1024 # Set according to your embedding model
+      - VECTOR_SIZE=1024
     depends_on:
       - minio
       - qdrant
@@ -73,11 +73,7 @@ services:
 
 volumes:
   minio_storage:
-    external: true  # Use your existing Docker volume
-    name: minio_storage  # Specify the name of your existing volume
   qdrant_storage:
-    external: true  # Use your existing Docker volume
-    name: qdrant_storage  # Specify the name of your existing volume
 
 networks:
   digitaltwins-network:

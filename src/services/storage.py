@@ -128,6 +128,26 @@ class StorageService:
         )
         return metadata
 
+    def delete_dataset_by_id(self, dataset_id: str) -> bool:
+        """
+        Delete a dataset by its ID.
+        Returns True if deletion was successful, False otherwise.
+        """
+        try:
+            # List all objects under the dataset prefix
+            objects = self.client.list_objects(
+                self.datasets_bucket,
+                prefix=f"{dataset_id}/",
+                recursive=True
+            )
+
+            for obj in objects:
+                self.client.remove_object(self.datasets_bucket, obj.object_name)
+
+            return True
+        except S3Error:
+            return False
+
     def store_model(self, model_id: str, metadata: dict, weight_files: Optional[List[bytes]] = None) -> None:
 
         """Store complete model information"""
@@ -200,3 +220,23 @@ class StorageService:
             f"{model_id}/metadata.json"
         )
         return metadata
+
+    def delete_model_by_id(self, model_id: str) -> bool:
+        """
+        Delete a model by its ID.
+        Returns True if deletion was successful, False otherwise.
+        """
+        try:
+            # List all objects under the model prefix
+            objects = self.client.list_objects(
+                self.models_bucket,
+                prefix=f"{model_id}/",
+                recursive=True
+            )
+
+            for obj in objects:
+                self.client.remove_object(self.models_bucket, obj.object_name)
+
+            return True
+        except S3Error:
+            return False
