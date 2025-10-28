@@ -1,4 +1,6 @@
 import uuid
+from contextlib import asynccontextmanager
+from typing import AsyncGenerator
 from fastapi import FastAPI, Request, HTTPException, UploadFile
 from fastapi.params import Form, File
 from fastapi.responses import HTMLResponse
@@ -11,15 +13,25 @@ from src.config import settings
 
 templates = Jinja2Templates(directory="templates")
 
+dataset_service = None
+model_service = None
+search_results_cache = {}
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    global dataset_service, model_service
+    # Initialize AFTER populate_data completes
+    dataset_service = get_dataset_service()
+    model_service = get_model_service()
+    yield
+
+
 app = FastAPI(
     title=settings.APP_NAME,
     description=settings.APP_DESCRIPTION,
+    lifespan=lifespan
 )
-
-dataset_service = get_dataset_service()
-model_service = get_model_service()
-
-search_results_cache = {}
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -157,7 +169,6 @@ async def add_model(
     # Split the model_id
     name, author = model_id.split("/")
 
-    # Create a mockup model item
     model_item = ModelItem(
         model_id=name,
         base_model="gpt-3",

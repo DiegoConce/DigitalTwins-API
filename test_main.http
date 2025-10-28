@@ -49,7 +49,7 @@ Accept: application/json
 description = text classification
 
 ### Download model file
-GET {{baseUrl}}/models/{{model_id}}/weights
+GET {{baseUrl}}/models/facebook/fasttext-no-vectors/weights
 
 
 ### Api Search for models

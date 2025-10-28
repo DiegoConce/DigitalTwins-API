@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     """Application settings and configuration."""
 
     # Application metadata
-    APP_NAME: str = "Catalog Search API"
+    APP_NAME: str = "DATHA Marketplace"
     APP_DESCRIPTION: str = "Digital Twins API for searching and retrieving catalog items."
 
     # Search settings

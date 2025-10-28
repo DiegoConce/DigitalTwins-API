@@ -16,25 +16,8 @@ ENV PYTHONUNBUFFERED=1
 
 EXPOSE 8000
 
-# Create entrypoint script
-COPY <<EOF /app/entrypoint.sh
-#!/bin/bash
-set -e
-
-echo "Starting API server..."
-uvicorn src.main:app --host 0.0.0.0 --port 8000 &
-API_PID=\$!
-
-echo "Waiting for services to be ready..."
-sleep 3
-
-echo "Populating data..."
-python -m src.populate_data || echo "Data population failed or already populated"
-
-echo "Services ready!"
-wait \$API_PID
-EOF
-
+# Copy entrypoint script
+COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
 # Run the entrypoint script
