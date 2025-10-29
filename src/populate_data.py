@@ -117,7 +117,7 @@ def populate_mock_data():
     mock_datasets = [
         DatasetItem(
             dataset_id="BIREX-CompetenceCenter/SISMA-3DPrinter-Logs",
-            author="BIREX-CompetenceCenter",
+            author="",
             created_at="2024-01-15",
             readme_file="System logs from SISMA metal 3D printers with process parameters and sensor readings for anomaly detection and predictive maintenance.",
             downloads=500,
@@ -132,7 +132,7 @@ def populate_mock_data():
         ),
         DatasetItem(
             dataset_id="BIREX-CompetenceCenter/SISMA-3DPrinter-Images",
-            author="BIREX-CompetenceCenter",
+            author="",
             created_at="2024-01-15",
             readme_file="Layer-by-layer optical images from SISMA 3D printers for defect detection and automated quality control.",
             downloads=750,
@@ -146,7 +146,7 @@ def populate_mock_data():
         ),
         DatasetItem(
             dataset_id="BIREX-CompetenceCenter/SISMA-3DPrinter-EnergeticConsumption",
-            author="BIREX-CompetenceCenter",
+            author="",
             created_at="2024-01-15",
             readme_file="Energy consumption profiles of SISMA 3D printers for efficiency and sustainability analysis.",
             downloads=400,
@@ -160,7 +160,7 @@ def populate_mock_data():
         ),
         DatasetItem(
             dataset_id="BIREX-CompetenceCenter/SLM-NIKON-3DPrinter-Logs",
-            author="BIREX-CompetenceCenter",
+            author="",
             created_at="2024-01-15",
             readme_file="Operational logs from NIKON SLM metal 3D printers including real-time process parameters and diagnostic data for fault detection.",
             downloads=520,
@@ -175,7 +175,7 @@ def populate_mock_data():
         ),
         DatasetItem(
             dataset_id="BIREX-CompetenceCenter/SLM-NIKON-3DPrinter-Images",
-            author="BIREX-CompetenceCenter",
+            author="",
             created_at="2024-01-15",
             readme_file="Optical images from NIKON SLM metal 3D printers annotated for surface defects and irregularities in additive manufacturing processes.",
             downloads=850,
@@ -189,7 +189,7 @@ def populate_mock_data():
         ),
         DatasetItem(
             dataset_id="BIREX-CompetenceCenter/SLM-NIKON-3DPrinter-EnergeticConsumption",
-            author="BIREX-CompetenceCenter",
+            author="",
             created_at="2024-01-15",
             readme_file="Energy usage time series collected from NIKON SLM metal 3D printers for energy efficiency and sustainability modeling.",
             downloads=420,
@@ -207,7 +207,7 @@ def populate_mock_data():
     mock_models = [
         ModelItem(
             model_id="BIREX-CompetenceCenter/SLM-NIKON-3DPrinter-DefectDetector-YOLO",
-            author="BIREX-CompetenceCenter",
+            author="",
             base_model="yolov5-cnn",
             readme_file="YOLO-based CNN model for defect and anomaly detection on images captured from NIKON SLM metal 3D printers.",
             license="apache-2.0",
@@ -222,7 +222,7 @@ def populate_mock_data():
         ),
         ModelItem(
             model_id="BIREX-CompetenceCenter/SISMA-3DPrinter-DefectDetector-YOLO",
-            author="BIREX-CompetenceCenter",
+            author="",
             base_model="yolov5-cnn",
             readme_file="YOLO-based CNN model for detecting defects and anomalies in images from SISMA metal 3D printers.",
             license="apache-2.0",
