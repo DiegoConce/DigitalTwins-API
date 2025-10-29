@@ -12,6 +12,12 @@ Accept: text/html
 ### Sample Datasets
 GET {{baseUrl}}/datasets
 
+### Api Datasets
+GET {{baseUrl}}/api/datasets
+
+### Api Models
+GET {{baseUrl}}/api/models
+
 ### Add a new dataset item
 POST http://127.0.0.1:8000/datasets/add
 Content-Type: application/x-www-form-urlencoded

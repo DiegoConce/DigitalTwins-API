@@ -48,6 +48,38 @@ async def view_datasets(request: Request):
     })
 
 
+@app.get("/api/datasets")
+async def api_sample_datasets():
+    results = dataset_service.get_sample()
+    return JSONResponse(content={
+        "count": len(results),
+        "results": [
+            {
+                "dataset_id": result.dataset_id,
+                "author": result.author,
+                "tags": result.tags,
+                "readme_file": result.readme_file,
+            }
+            for result in results
+        ]
+    })
+
+@app.get("/api/models")
+async def api_sample_models():
+    results = model_service.get_sample()
+    return JSONResponse(content={
+        "count": len(results),
+        "results": [
+            {
+                "model_id": result.model_id,
+                "author": result.author,
+                "pipeline_tag": result.pipeline_tag,
+                "readme_file": result.readme_file,
+            }
+            for result in results
+        ]
+    })
+
 @app.get("/datasets/add", response_class=HTMLResponse)
 async def show_add_dataset_form(request: Request):
     return templates.TemplateResponse("add_dataset.html", {"request": request})
