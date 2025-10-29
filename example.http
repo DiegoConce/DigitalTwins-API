@@ -14,11 +14,19 @@ POST {{baseUrl}}/api/search/datasets
 Content-Type: application/x-www-form-urlencoded
 Accept: application/json
 
-description = sentiment analysis
+description = sisma
 
-### Download dataset file
-GET {{baseUrl}}/datasets/{{dataset_id}}/data
+### Download dataset data file (placeholder.txt)
+GET {{baseUrl}}/datasets/{{dataset_id}}/data?file_type=data
 Accept: text/plain
+
+### Download dataset CSV sample
+GET {{baseUrl}}/datasets/{{dataset_id}}/data?file_type=sample
+Accept: text/csv
+
+### Download dataset - invalid file type (should return 400)
+GET {{baseUrl}}/datasets/{{dataset_id}}/data?file_type=invalid
+Accept: application/json
 
 # 🤖 MODELS ROUTES
 
@@ -33,9 +41,18 @@ Accept: application/json
 
 description = text classification
 
-### Download model weights file
-GET {{baseUrl}}/models/{{model_id}}/weights
+### Download model weights file (placeholder.txt)
+GET {{baseUrl}}/models/{{model_id}}/weights?file_type=weights
 Accept: text/plain
 
+### Download model CSV sample
+GET {{baseUrl}}/models/{{model_id}}/weights?file_type=sample
+Accept: text/csv
 
+### Download model - invalid file type (should return 400)
+GET {{baseUrl}}/models/{{model_id}}/weights?file_type=invalid
+Accept: application/json
 
+### Download model - default weights (no file_type param)
+GET {{baseUrl}}/models/{{model_id}}/weights
+Accept: text/plain
