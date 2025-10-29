@@ -29,7 +29,7 @@ class ModelService:
 
         return [self.dict_to_model_item(metadata) for metadata in results]
 
-    def add_model(self, item: ModelItem, embedding: np.array, weights: Optional[List[bytes]] = None) -> None:
+    def add_model(self, item: ModelItem, embedding: np.array, weights: Optional[List[bytes]] = None, csv_sample: Optional[List[bytes]] = None) -> None:
         """Add a new model to the catalog."""
         model_id = item.author + "/" + item.model_id
 
@@ -55,7 +55,7 @@ class ModelService:
         }
 
         # Store metadata in MinIO
-        self.storage_service.store_model(model_id, metadata, weight_files=weights)
+        self.storage_service.store_model(model_id, metadata, weight_files=weights, csv_sample=csv_sample)
 
         # Add model to Qdrant vector DB
         self.qdrant_service.upsert_model(model_id, embedding)

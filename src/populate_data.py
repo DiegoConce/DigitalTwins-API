@@ -1,3 +1,5 @@
+import csv
+import io
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
@@ -70,6 +72,37 @@ def bulk_populate_models(csv_path: str):
     print("Models population complete.")
 
 
+def generate_mock_csv() -> bytes:
+    """Generate a mock CSV file for a dataset/model with realistic printer data."""
+    csv_buffer = io.StringIO()
+    writer = csv.writer(csv_buffer)
+
+    # Write header
+    writer.writerow([
+        "timestamp", "machine_id", "session_id",
+        "parameter_name", "parameter_value", "unit", "status_code", "message"
+    ])
+
+    # Example rows (you can extend this or randomize values later)
+    rows = [
+        [
+            "2025-10-28T09:15:34Z", "SISMA_A450", "JOB_2025_041",
+            "temp_chamber", 192.4, "°C", "OK", "Stable chamber temperature"
+        ],
+        [
+            "2025-10-28T09:15:36Z", "SISMA_A450", "JOB_2025_041",
+            "laser_power", 184.7, "W", "OK", "Laser operating within nominal range"
+        ],
+        [
+            "2025-10-28T09:15:38Z", "SISMA_A450", "JOB_2025_041",
+            "oxygen_level", 0.082, "%", "WARN", "Residual O₂ above nominal threshold"
+        ]
+    ]
+    writer.writerows(rows)
+
+    return csv_buffer.getvalue().encode("utf-8")
+
+
 def populate_mock_data():
     """Add 6 personalized datasets and 2 personalized models as mock data."""
     dataset_service = get_dataset_service()
@@ -78,10 +111,12 @@ def populate_mock_data():
     placeholder_file = (b"This is a placeholder file. "
                         b"It is used to represent a dataset file or a weight file for a model.")
 
+    csv_bytes = generate_mock_csv()
+
     # Datasets
     mock_datasets = [
         DatasetItem(
-            dataset_id="SISMA-3DPrinter-Logs",
+            dataset_id="BIREX-CompetenceCenter/SISMA-3DPrinter-Logs",
             author="BIREX-CompetenceCenter",
             created_at="2024-01-15",
             readme_file="System logs from SISMA metal 3D printers with process parameters and sensor readings for anomaly detection and predictive maintenance.",
@@ -96,7 +131,7 @@ def populate_mock_data():
             task_categories=["time-series-analysis"]
         ),
         DatasetItem(
-            dataset_id="SISMA-3DPrinter-Images",
+            dataset_id="BIREX-CompetenceCenter/SISMA-3DPrinter-Images",
             author="BIREX-CompetenceCenter",
             created_at="2024-01-15",
             readme_file="Layer-by-layer optical images from SISMA 3D printers for defect detection and automated quality control.",
@@ -110,7 +145,7 @@ def populate_mock_data():
             task_categories=["image-classification", "object-detection"]
         ),
         DatasetItem(
-            dataset_id="SISMA-3DPrinter-EnergeticConsumption",
+            dataset_id="BIREX-CompetenceCenter/SISMA-3DPrinter-EnergeticConsumption",
             author="BIREX-CompetenceCenter",
             created_at="2024-01-15",
             readme_file="Energy consumption profiles of SISMA 3D printers for efficiency and sustainability analysis.",
@@ -124,7 +159,7 @@ def populate_mock_data():
             task_categories=["time-series-analysis"]
         ),
         DatasetItem(
-            dataset_id="SLM-NIKON-3DPrinter-Logs",
+            dataset_id="BIREX-CompetenceCenter/SLM-NIKON-3DPrinter-Logs",
             author="BIREX-CompetenceCenter",
             created_at="2024-01-15",
             readme_file="Operational logs from NIKON SLM metal 3D printers including real-time process parameters and diagnostic data for fault detection.",
@@ -139,7 +174,7 @@ def populate_mock_data():
             task_categories=["time-series-analysis"]
         ),
         DatasetItem(
-            dataset_id="SLM-NIKON-3DPrinter-Images",
+            dataset_id="BIREX-CompetenceCenter/SLM-NIKON-3DPrinter-Images",
             author="BIREX-CompetenceCenter",
             created_at="2024-01-15",
             readme_file="Optical images from NIKON SLM metal 3D printers annotated for surface defects and irregularities in additive manufacturing processes.",
@@ -153,7 +188,7 @@ def populate_mock_data():
             task_categories=["image-classification", "object-detection"]
         ),
         DatasetItem(
-            dataset_id="SLM-NIKON-3DPrinter-EnergeticConsumption",
+            dataset_id="BIREX-CompetenceCenter/SLM-NIKON-3DPrinter-EnergeticConsumption",
             author="BIREX-CompetenceCenter",
             created_at="2024-01-15",
             readme_file="Energy usage time series collected from NIKON SLM metal 3D printers for energy efficiency and sustainability modeling.",
@@ -171,7 +206,7 @@ def populate_mock_data():
     # 2 Personalized Models
     mock_models = [
         ModelItem(
-            model_id="SLM-NIKON-3DPrinter-DefectDetector-YOLO",
+            model_id="BIREX-CompetenceCenter/SLM-NIKON-3DPrinter-DefectDetector-YOLO",
             author="BIREX-CompetenceCenter",
             base_model="yolov5-cnn",
             readme_file="YOLO-based CNN model for defect and anomaly detection on images captured from NIKON SLM metal 3D printers.",
@@ -186,7 +221,7 @@ def populate_mock_data():
             created_at="2024-03-01"
         ),
         ModelItem(
-            model_id="SISMA-3DPrinter-DefectDetector-YOLO",
+            model_id="BIREX-CompetenceCenter/SISMA-3DPrinter-DefectDetector-YOLO",
             author="BIREX-CompetenceCenter",
             base_model="yolov5-cnn",
             readme_file="YOLO-based CNN model for detecting defects and anomalies in images from SISMA metal 3D printers.",
@@ -202,14 +237,15 @@ def populate_mock_data():
         )
     ]
 
+
+
     print("Adding personalized mock datasets...")
     for dataset in tqdm(mock_datasets, desc="Mock datasets"):
         try:
             # Generate random embedding
-            embedding = np.random.randn(1024).astype(np.float32)
-            embedding = embedding / np.linalg.norm(embedding)
+            embedding = dataset_service.rag_service.embedding_service.encode_dataset_item(dataset)
 
-            dataset_service.add_dataset(dataset, embedding, data=[placeholder_file])
+            dataset_service.add_dataset(dataset, embedding, csv_sample=[csv_bytes])
         except Exception as e:
             print(f"Error adding dataset {dataset.dataset_id}: {e}")
 
@@ -217,10 +253,9 @@ def populate_mock_data():
     for model in tqdm(mock_models, desc="Mock models"):
         try:
             # Generate random embedding
-            embedding = np.random.randn(1024).astype(np.float32)
-            embedding = embedding / np.linalg.norm(embedding)
+            embedding = model_service.rag_service.embedding_service.encode_model_item(model)
 
-            model_service.add_model(model, embedding, weights=[placeholder_file])
+            model_service.add_model(model, embedding, csv_sample=[csv_bytes])
         except Exception as e:
             print(f"Error adding model {model.model_id}: {e}")
 
@@ -260,8 +295,8 @@ def data_already_present():
 
 if __name__ == "__main__":
     # Update paths as needed
-    DATASETS_CSV = "data/datasets_hg_embeddings_sm.csv"
-    MODELS_CSV = "data/models_hg_embeddings_sm.csv"
+    DATASETS_CSV = "/home/diego/Documenti/Workspace/DigitalTwins-API/data/datasets_hg_embeddings_sm.csv"
+    MODELS_CSV = "/home/diego/Documenti/Workspace/DigitalTwins-API/data/models_hg_embeddings_sm.csv"
 
     if data_already_present():
         print("Data already present in storage or vector DB. Skipping population.")
@@ -272,5 +307,6 @@ if __name__ == "__main__":
         qdrant_service = get_qdrant_service()
         datasets_count = qdrant_service.client.count(collection_name=settings.QDRANT_DATASETS_COLLECTION)
         models_count = qdrant_service.client.count(collection_name=settings.QDRANT_MODELS_COLLECTION)
+        
         print(f"After CSV: Datasets={datasets_count.count}, Models={models_count.count}")
 

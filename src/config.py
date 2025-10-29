@@ -8,14 +8,14 @@ class Settings(BaseSettings):
 
     # Application metadata
     APP_NAME: str = "DATHA Marketplace"
-    APP_DESCRIPTION: str = "Digital Twins API for searching and retrieving catalog items."
+    APP_DESCRIPTION: str = "DATHA Marketplace API for searching and retrieving catalog items."
 
     # Search settings
     DEFAULT_TOP_K: int = 3 # Number of top results to return
     USE_LLM_FILTER: bool = False  # Whether to use LLM-based relevance filtering
 
     # Hugging Face API settings
-    HUGGINGFACE_API_TOKEN: str = "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"
+    HUGGINGFACE_API_TOKEN: str = "YOUR_TOKEN"
 
     # Model settings
     LANGUAGE_MODEL_NAME: str = "meta-llama/Llama-3.2-3B"    #"meta-llama/Llama-3.1-8B-Instruct"

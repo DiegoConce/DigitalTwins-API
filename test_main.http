@@ -1,82 +1,58 @@
-# FastApi Route Tests
-
+# 🔧 Environment Variables
 @baseUrl = http://127.0.0.1:8000
 @model_id = binwang/RSE-BERT-base-STS
-@dataset_id = nbroad/mediasum
+@dataset_id = soda-lmu/tweet-annotation-sensitivity-1
 
+# 📦 DATASETS ROUTES
 
-### Root
-GET {{baseUrl}}/
-Accept: text/html
-
-### Sample Datasets
-GET {{baseUrl}}/datasets
-
-### Api Datasets
+### List datasets (API)
 GET {{baseUrl}}/api/datasets
+Accept: application/json
 
-
-### Api Models
-GET {{baseUrl}}/api/models
-
-### Add a new dataset item
-POST http://127.0.0.1:8000/datasets/add
+### Search datasets (API)
+POST {{baseUrl}}/api/search/datasets
 Content-Type: application/x-www-form-urlencoded
 Accept: application/json
 
-dataset_id = my-new-dataset-diego
+description = sisma
 
-### Search datasets
-POST {{baseUrl}}/search/datasets
-Content-Type: application/x-www-form-urlencoded
-Accept: application/json
-
-description = sentiment analysis
-
-### Download dataset file
-GET {{baseUrl}}/datasets/{{dataset_id}}/data
+### Download dataset data file (placeholder.txt)
+GET {{baseUrl}}/datasets/{{dataset_id}}/data?file_type=data
 Accept: text/plain
 
+### Download dataset CSV sample
+GET {{baseUrl}}/datasets/{{dataset_id}}/data?file_type=sample
+Accept: text/csv
 
-### Sample Models
-GET {{baseUrl}}/models
-
-### Add a new model item
-POST http://127.0.0.1:8000/models/add
-Content-Type: application/x-www-form-urlencoded
+### Download dataset - invalid file type (should return 400)
+GET {{baseUrl}}/datasets/{{dataset_id}}/data?file_type=invalid
 Accept: application/json
 
-model_id = my-new-model-diego
+# 🤖 MODELS ROUTES
 
-### Search models
-POST {{baseUrl}}/search/models
-Content-Type: application/x-www-form-urlencoded
+### List models (API)
+GET {{baseUrl}}/api/models
 Accept: application/json
 
-description = text classification
-
-### Download model file
-GET {{baseUrl}}/models/facebook/fasttext-no-vectors/weights
-
-
-### Api Search for models
+### Search models (API)
 POST {{baseUrl}}/api/search/models
 Content-Type: application/x-www-form-urlencoded
 Accept: application/json
 
 description = text classification
 
-### Api Search for datasets
-POST {{baseUrl}}/api/search/datasets
-Content-Type: application/x-www-form-urlencoded
+### Download model weights file (placeholder.txt)
+GET {{baseUrl}}/models/{{model_id}}/weights?file_type=weights
+Accept: text/plain
+
+### Download model CSV sample
+GET {{baseUrl}}/models/{{model_id}}/weights?file_type=sample
+Accept: text/csv
+
+### Download model - invalid file type (should return 400)
+GET {{baseUrl}}/models/{{model_id}}/weights?file_type=invalid
 Accept: application/json
 
-description = sentiment analysis
-
-### Delete a dataset item
-DELETE {{baseUrl}}/api/datasets/{{dataset_id}}
-Accept: application/json
-
-### Delete a model item
-DELETE {{baseUrl}}/api/models/{{model_id}}
-Accept: application/json
+### Download model - default weights (no file_type param)
+GET {{baseUrl}}/models/{{model_id}}/weights
+Accept: text/plain

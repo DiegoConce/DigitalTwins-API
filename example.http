@@ -1,0 +1,41 @@
+# 🔧 Environment Variables
+@baseUrl = http://127.0.0.1:8000
+@model_id = binwang/RSE-BERT-base-STS
+@dataset_id = soda-lmu/tweet-annotation-sensitivity-1
+
+# 📦 DATASETS ROUTES
+
+### List datasets (API)
+GET {{baseUrl}}/api/datasets
+Accept: application/json
+
+### Search datasets (API)
+POST {{baseUrl}}/api/search/datasets
+Content-Type: application/x-www-form-urlencoded
+Accept: application/json
+
+description = sentiment analysis
+
+### Download dataset file
+GET {{baseUrl}}/datasets/{{dataset_id}}/data
+Accept: text/plain
+
+# 🤖 MODELS ROUTES
+
+### List models (API)
+GET {{baseUrl}}/api/models
+Accept: application/json
+
+### Search models (API)
+POST {{baseUrl}}/api/search/models
+Content-Type: application/x-www-form-urlencoded
+Accept: application/json
+
+description = text classification
+
+### Download model weights file
+GET {{baseUrl}}/models/{{model_id}}/weights
+Accept: text/plain
+
+
+

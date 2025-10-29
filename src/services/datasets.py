@@ -30,7 +30,7 @@ class DatasetService:
 
         return [self.dict_to_dataset_item(metadata) for metadata in results]
 
-    def add_dataset(self, item: DatasetItem, embedding: np.ndarray, data: Optional[List[bytes]] = None) -> None:
+    def add_dataset(self, item: DatasetItem, embedding: np.ndarray, data: Optional[List[bytes]] = None, csv_sample: Optional[List[bytes]] = None) -> None:
         """Add a new dataset to the catalog."""
         dataset_id = item.author + "/" + item.dataset_id
 
@@ -56,7 +56,7 @@ class DatasetService:
         }
 
         # Store metadata in MinIO
-        self.storage_service.store_dataset(dataset_id, metadata, sample_files=data)
+        self.storage_service.store_dataset(dataset_id, metadata, sample_files=data, csv_sample=csv_sample)
 
         # Store embedding in Qdrant
         self.qdrant_service.upsert_dataset(dataset_id, embedding)

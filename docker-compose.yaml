@@ -43,11 +43,11 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - APP_NAME="Catalog Search API"
-      - APP_DESCRIPTION="Digital Twins API for searching and retrieving catalog items."
+      - APP_NAME="DATHA Marketplace"
+      - APP_DESCRIPTION="DATHA Marketplace API for searching and retrieving catalog items."
       - EMBEDDING_MODEL_NAME=jinaai/jina-embeddings-v3
       - LANGUAGE_MODEL_NAME=meta-llama/Llama-3.1-8B-Instruct
-      - HUGGINGFACE_API_TOKEN=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
+      - HUGGINGFACE_API_TOKEN=YOUR_TOKEN
       - DEVICE=auto
       - EMBEDDING_DEVICE=auto
       - LLM_DEVICE=auto

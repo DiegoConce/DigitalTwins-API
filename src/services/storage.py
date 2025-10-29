@@ -54,7 +54,7 @@ class StorageService:
             return None
 
     # Dataset Operations
-    def store_dataset(self, dataset_id: str, metadata: dict, sample_files: Optional[List[bytes]] = None) -> None:
+    def store_dataset(self, dataset_id: str, metadata: dict, sample_files: Optional[List[bytes]] = None, csv_sample: Optional[List[bytes]] = None) -> None:
 
         """Store complete dataset information"""
         metadata_with_timestamp = {
@@ -78,6 +78,16 @@ class StorageService:
                     io.BytesIO(file_bytes),
                     len(file_bytes),
                     content_type="text/plain"
+                )
+
+        if csv_sample:
+            for idx, file_bytes in enumerate(csv_sample):
+                self.client.put_object(
+                    self.datasets_bucket,
+                    f"{dataset_id}/data/sample.csv",
+                    io.BytesIO(file_bytes),
+                    len(file_bytes),
+                    content_type="application/json"
                 )
 
     def list_datasets(self) -> list:
@@ -148,7 +158,8 @@ class StorageService:
         except S3Error:
             return False
 
-    def store_model(self, model_id: str, metadata: dict, weight_files: Optional[List[bytes]] = None) -> None:
+    def store_model(self, model_id: str, metadata: dict, weight_files: Optional[List[bytes]] = None,
+                    csv_sample: Optional[List[bytes]] = None) -> None:
 
         """Store complete model information"""
         metadata_with_timestamp = {
@@ -172,6 +183,16 @@ class StorageService:
                     io.BytesIO(file_bytes),
                     len(file_bytes),
                     content_type="text/plain"
+                )
+
+        if csv_sample:
+            for idx, file_bytes in enumerate(csv_sample):
+                self.client.put_object(
+                    self.models_bucket,
+                    f"{model_id}/weights/sample.csv",
+                    io.BytesIO(file_bytes),
+                    len(file_bytes),
+                    content_type="application/json"
                 )
 
     def list_models(self) -> list:

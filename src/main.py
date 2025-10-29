@@ -151,23 +151,32 @@ async def get_search_results(search_id: str, request: Request):
 
 
 @app.get("/datasets/{dataset_id:path}/data")
-async def download_dataset_data(dataset_id: str):
+async def download_dataset_data(dataset_id: str, file_type: str = "data"):
     bucket = dataset_service.storage_service.datasets_bucket
-    object_path = f"{dataset_id}/data/placeholder.txt"
+
+    if file_type == "data":
+        object_path = f"{dataset_id}/data/placeholder.txt"
+        media_type = "text/plain"
+        extension = "txt"
+    elif file_type == "sample":
+        object_path = f"{dataset_id}/data/sample.csv"
+        media_type = "text/csv"
+        extension = "csv"
+    else:
+        raise HTTPException(status_code=400, detail="Invalid file_type. Use 'data' or 'sample'")
 
     try:
         response = dataset_service.storage_service.client.get_object(bucket, object_path)
     except S3Error:
-        raise HTTPException(status_code=404, detail="Dataset file not found")
+        raise HTTPException(status_code=404, detail=f"Dataset {file_type} file not found")
 
-    filename = f"{dataset_id.replace('/', '-')}_data.txt"
+    filename = f"{dataset_id.replace('/', '-')}_{file_type}.{extension}"
 
     return StreamingResponse(
         response,
-        media_type="text/plain",
+        media_type=media_type,
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
-
 
 @app.get("/models", response_class=HTMLResponse)
 async def view_models(request: Request):
@@ -249,20 +258,31 @@ async def get_model_search_results(search_id: str, request: Request):
 
 
 @app.get("/models/{model_id:path}/weights")
-async def download_model_weights(model_id: str):
+async def download_model_file(model_id: str, file_type: str = "weights"):
     bucket = model_service.storage_service.models_bucket
-    object_path = f"{model_id}/weights/placeholder.txt"
+
+    # Determine file path and media type based on file_type
+    if file_type == "weights":
+        object_path = f"{model_id}/weights/placeholder.txt"
+        media_type = "text/plain"
+        extension = "txt"
+    elif file_type == "sample":
+        object_path = f"{model_id}/weights/sample.csv"
+        media_type = "text/csv"
+        extension = "csv"
+    else:
+        raise HTTPException(status_code=400, detail="Invalid file_type. Use 'weights' or 'sample'")
 
     try:
         response = model_service.storage_service.client.get_object(bucket, object_path)
     except S3Error:
-        raise HTTPException(status_code=404, detail="Model weights file not found")
+        raise HTTPException(status_code=404, detail=f"Model {file_type} file not found")
 
-    filename = f"{model_id.replace('/', '-')}_weights.txt"
+    filename = f"{model_id.replace('/', '-')}_{file_type}.{extension}"
 
     return StreamingResponse(
         response,
-        media_type="text/plain",
+        media_type=media_type,
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
 
