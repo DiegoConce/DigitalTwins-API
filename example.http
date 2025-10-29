@@ -1,7 +1,7 @@
 # 🔧 Environment Variables
 @baseUrl = http://127.0.0.1:8000
 @model_id = binwang/RSE-BERT-base-STS
-@dataset_id = soda-lmu/tweet-annotation-sensitivity-1
+@dataset_id = BIREX-CompetenceCenter/SISMA-3DPrinter-EnergeticConsumption
 
 # 📦 DATASETS ROUTES
 
@@ -14,7 +14,7 @@ POST {{baseUrl}}/api/search/datasets
 Content-Type: application/x-www-form-urlencoded
 Accept: application/json
 
-description = sisma
+description = I'm searching for a predictive maintenance or anomaly detection dataset in the field of additive manufacturing (3D printing).
 
 ### Download dataset data file (placeholder.txt)
 GET {{baseUrl}}/datasets/{{dataset_id}}/data?file_type=data

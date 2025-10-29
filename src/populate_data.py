@@ -295,8 +295,8 @@ def data_already_present():
 
 if __name__ == "__main__":
     # Update paths as needed
-    DATASETS_CSV = "/home/diego/Documenti/Workspace/DigitalTwins-API/data/datasets_hg_embeddings_sm.csv"
-    MODELS_CSV = "/home/diego/Documenti/Workspace/DigitalTwins-API/data/models_hg_embeddings_sm.csv"
+    DATASETS_CSV = "data/datasets_hg_embeddings_sm.csv"
+    MODELS_CSV = "data/models_hg_embeddings_sm.csv"
 
     if data_already_present():
         print("Data already present in storage or vector DB. Skipping population.")

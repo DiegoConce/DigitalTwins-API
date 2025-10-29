@@ -51,7 +51,7 @@ services:
       - DEVICE=auto
       - EMBEDDING_DEVICE=auto
       - LLM_DEVICE=auto
-      - DEFAULT_TOP_K=3
+      - DEFAULT_TOP_K=5
       - PROMPT_TEMPLATE="As an intelligent language model, your role is to accurately determine whether the provided data is relevant to the user's query. Answer ONLY with 'Yes' or 'No'"
       - MINIO_ENDPOINT=minio:9000
       - MINIO_ACCESS_KEY=minioadmin

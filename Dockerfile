@@ -24,7 +24,7 @@ EXPOSE 8000
 
 # Copy entrypoint script
 COPY entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
+RUN sed -i 's/\r$//' /app/entrypoint.sh && chmod 755 /app/entrypoint.sh
 
 # Run the entrypoint script
 CMD ["/app/entrypoint.sh"]
