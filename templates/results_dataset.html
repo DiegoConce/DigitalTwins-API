@@ -277,6 +277,21 @@
             .metadata-grid {
                 grid-template-columns: 1fr;
             }
+
+            .download-section {
+                display: flex;
+                gap: 12px;
+                flex-wrap: wrap;
+            }
+
+            .download-btn-secondary {
+                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            }
+
+            .download-btn-secondary:hover {
+                box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+            }
+
         }
     </style>
 </head>
@@ -304,13 +319,23 @@
                     </p>
                     {% endif %}
                 </div>
-                <a
-                        class="download-btn"
-                        href="/datasets/{{ item.dataset_id }}/data"
-                        download="{{ item.dataset_id.replace('/', '-') }}_data.txt">
-                    <span>⬇️</span>
-                    <span>Download</span>
-                </a>
+                <div class="download-section">
+                    <a
+                            class="download-btn"
+                            href="/datasets/{{ item.author }}/{{ item.dataset_id }}/data?file_type=data"
+                            download="{{ item.author }}-{{ item.dataset_id }}_data.txt">
+                        <span>⬇️</span>
+                        <span>Download Data (TXT)</span>
+                    </a>
+                    <a
+                            class="download-btn download-btn-secondary"
+                            href="/datasets/{{ item.author }}/{{ item.dataset_id }}/data?file_type=sample"
+                            download="{{ item.author }}-{{ item.dataset_id }}_sample.csv">
+                        <span>📊</span>
+                        <span>Download Sample (CSV)</span>
+                    </a>
+                </div>
+
 
             </div>
 
