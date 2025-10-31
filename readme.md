@@ -1,4 +1,4 @@
-# Catalog Search API for DigitalTwins
+# DATHA Marketplace
 
 A Retrieval-Augmented Generation (RAG) system for semantically searching HuggingFace datasets and models using embeddings, with vector storage [**Qdrant**](https://qdrant.tech/documentation/overview/) and object storage [**MinIO**](https://charts.min.io/).
 
@@ -82,42 +82,11 @@ cd DigitalTwins-API
 ### 2. Prepare Data Files
 
 Ensure your `data/` directory contains:
-- `datasets_hg_embeddings_sm.csv`
-- `models_hg_embeddings_sm.csv`
+- `data.zip` file
 
-If you have a `data.zip`, extract it:
+It will be unzipped automatically by the entrypoint script.
 
-```bash
-unzip data/data.zip -d data/
-```
-
-### 3. Configure Environment
-
-Create a `.env` file in the project root:
-
-```env
-# HuggingFace Token (required for LLM filtering)
-HUGGINGFACE_API_TOKEN=your_token_here
-
-# Device Configuration
-EMBEDDING_DEVICE=cpu
-LLM_DEVICE=cpu
-
-# MinIO Configuration (use default Docker values)
-MINIO_ENDPOINT=minio:9000
-MINIO_ACCESS_KEY=minioadmin
-MINIO_SECRET_KEY=minioadmin
-
-# Qdrant Configuration (use default Docker values)
-QDRANT_HOST=qdrant
-QDRANT_PORT=6333
-
-# Search Settings
-DEFAULT_TOP_K=3
-USE_LLM_FILTER=false
-```
-
-### 4. Start Services with Docker Compose
+### 3. Start Services with Docker Compose
 
 ```bash
 # Build and start all services (FastAPI, MinIO, Qdrant)
@@ -318,8 +287,7 @@ LLM_DEVICE=auto
 ```
 DigitalTwins-API/
 ├── data/                           # CSV files with embeddings
-│   ├── datasets_hg_embeddings_sm.csv
-│   └── models_hg_embeddings_sm.csv
+│   ├── data.zip
 ├── src/
 │   ├── main.py                     # FastAPI application
 │   ├── config.py                   # Configuration settings
@@ -335,6 +303,8 @@ DigitalTwins-API/
 │       └── vectordb.py             # Qdrant vector DB service
 ├── templates/                      # HTML templates
 │   ├── index.html
+│   ├── add_dataset.html
+│   ├── add_model.html
 │   ├── datasets.html
 │   ├── models.html
 │   ├── results_dataset.html
@@ -342,7 +312,10 @@ DigitalTwins-API/
 ├── docker-compose.yaml             # Docker services configuration
 ├── Dockerfile                      # API container definition
 ├── requirements.txt                # Python dependencies
-└── readme.md                       # This file
+├── readme.md                       # This file
+├── entrypoint.sh                   # Docker entrypoint script
+├── example.http                    # API testing examples
+└── test_main.http                  # API testing examples
 ```
 
 ---
