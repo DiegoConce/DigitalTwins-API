@@ -278,21 +278,6 @@
                 grid-template-columns: 1fr;
             }
         }
-
-        .download-section {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .download-btn-secondary {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        }
-
-        .download-btn-secondary:hover {
-            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
-        }
-
     </style>
 </head>
 <body>
@@ -319,22 +304,13 @@
                     </p>
                     {% endif %}
                 </div>
-                <div class="download-section">
-                    <a
-                            class="download-btn"
-                            href="/models/{{ item.author }}/{{ item.model_id }}/weights?file_type=weights"
-                            download="{{ item.author }}-{{ item.model_id }}_weights.txt">
-                        <span>⬇️</span>
-                        <span>Download Weights (TXT)</span>
-                    </a>
-                    <a
-                            class="download-btn download-btn-secondary"
-                            href="/models/{{ item.author }}/{{ item.model_id }}/weights?file_type=sample"
-                            download="{{ item.author }}-{{ item.model_id }}_sample.csv">
-                        <span>📊</span>
-                        <span>Download Sample (CSV)</span>
-                    </a>
-                </div>
+                <a
+                        class="download-btn"
+                        href="/models/{{ item.model_id }}/weights?file_type={{ 'sample' if item.has_csv else 'weights' }}"
+                        download="{{ item.model_id }}_{{ 'sample.csv' if item.has_csv else 'weights.txt' }}">
+                    <span>⬇️</span>
+                    <span>Download</span>
+                </a>
 
             </div>
 

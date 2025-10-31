@@ -18,6 +18,7 @@ class DatasetItem(BaseModel):
     size_categories: List[str] = []
     task_categories: List[str] = []
     embeddings: List[str] = []
+    has_csv: bool = False
 
 
 class ModelItem(BaseModel):
@@ -34,3 +35,4 @@ class ModelItem(BaseModel):
     library_name: Optional[str] = ""
     created_at: Optional[str] = ""
     embeddings: List[str] = []
+    has_csv: bool = False

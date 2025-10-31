@@ -30,7 +30,8 @@ class DatasetService:
 
         return [self.dict_to_dataset_item(metadata) for metadata in results]
 
-    def add_dataset(self, item: DatasetItem, embedding: np.ndarray, data: Optional[List[bytes]] = None, csv_sample: Optional[List[bytes]] = None) -> None:
+    def add_dataset(self, item: DatasetItem, embedding: np.ndarray, data: Optional[List[bytes]] = None,
+                    csv_sample: Optional[List[bytes]] = None) -> None:
         """Add a new dataset to the catalog."""
         dataset_id = item.author + "/" + item.dataset_id
 
@@ -53,6 +54,7 @@ class DatasetService:
             'multilinguality': item.multilinguality,
             'size_categories': item.size_categories,
             'task_categories': item.task_categories,
+            'has_csv': getattr(item, 'has_csv', False)
         }
 
         # Store metadata in MinIO
@@ -116,5 +118,6 @@ class DatasetService:
             license=safe_str(metadata.get("license", "")),
             multilinguality=ensure_list(metadata.get("multilinguality")),
             size_categories=ensure_list(metadata.get("size_categories")),
-            task_categories=ensure_list(metadata.get("task_categories"))
+            task_categories=ensure_list(metadata.get("task_categories")),
+            has_csv=metadata.get("has_csv", False)
         )

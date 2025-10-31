@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     APP_DESCRIPTION: str = "DATHA Marketplace API for searching and retrieving catalog items."
 
     # Search settings
-    DEFAULT_TOP_K: int = 3 # Number of top results to return
+    DEFAULT_TOP_K: int = 5 # Number of top results to return
     USE_LLM_FILTER: bool = False  # Whether to use LLM-based relevance filtering
 
     # Hugging Face API settings

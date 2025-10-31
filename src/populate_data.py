@@ -128,7 +128,8 @@ def populate_mock_data():
             license="cc-by-nc-4.0",
             multilinguality=["nonlinguistic"],
             size_categories=["100K<n<1M"],
-            task_categories=["time-series-analysis"]
+            task_categories=["time-series-analysis"],
+            has_csv=True
         ),
         DatasetItem(
             dataset_id="BIREX-CompetenceCenter/SISMA-3DPrinter-Images",
@@ -142,7 +143,8 @@ def populate_mock_data():
             license="cc-by-nc-4.0",
             multilinguality=["nonlinguistic"],
             size_categories=["10K<n<100K"],
-            task_categories=["image-classification", "object-detection"]
+            task_categories=["image-classification", "object-detection"],
+            has_csv=True
         ),
         DatasetItem(
             dataset_id="BIREX-CompetenceCenter/SISMA-3DPrinter-EnergeticConsumption",
@@ -156,7 +158,8 @@ def populate_mock_data():
             license="cc-by-nc-4.0",
             multilinguality=["nonlinguistic"],
             size_categories=["10K<n<100K"],
-            task_categories=["time-series-analysis"]
+            task_categories=["time-series-analysis"],
+            has_csv=True
         ),
         DatasetItem(
             dataset_id="BIREX-CompetenceCenter/SLM-NIKON-3DPrinter-Logs",
@@ -171,7 +174,8 @@ def populate_mock_data():
             license="cc-by-nc-4.0",
             multilinguality=["nonlinguistic"],
             size_categories=["100K<n<1M"],
-            task_categories=["time-series-analysis"]
+            task_categories=["time-series-analysis"],
+            has_csv=True
         ),
         DatasetItem(
             dataset_id="BIREX-CompetenceCenter/SLM-NIKON-3DPrinter-Images",
@@ -185,7 +189,8 @@ def populate_mock_data():
             license="cc-by-nc-4.0",
             multilinguality=["nonlinguistic"],
             size_categories=["10K<n<100K"],
-            task_categories=["image-classification", "object-detection"]
+            task_categories=["image-classification", "object-detection"],
+            has_csv=True
         ),
         DatasetItem(
             dataset_id="BIREX-CompetenceCenter/SLM-NIKON-3DPrinter-EnergeticConsumption",
@@ -199,7 +204,8 @@ def populate_mock_data():
             license="cc-by-nc-4.0",
             multilinguality=["nonlinguistic"],
             size_categories=["10K<n<100K"],
-            task_categories=["time-series-analysis"]
+            task_categories=["time-series-analysis"],
+            has_csv=True
         )
     ]
 
@@ -218,7 +224,8 @@ def populate_mock_data():
                   "additive-manufacturing", "nikon"],
             pipeline_tag="object-detection",
             library_name="ultralytics",
-            created_at="2024-03-01"
+            created_at="2024-03-01",
+            has_csv=True
         ),
         ModelItem(
             model_id="BIREX-CompetenceCenter/SISMA-3DPrinter-DefectDetector-YOLO",
@@ -233,11 +240,10 @@ def populate_mock_data():
                   "additive-manufacturing", "sisma"],
             pipeline_tag="object-detection",
             library_name="ultralytics",
-            created_at="2024-03-01"
+            created_at="2024-03-01",
+            has_csv=True
         )
     ]
-
-
 
     print("Adding personalized mock datasets...")
     for dataset in tqdm(mock_datasets, desc="Mock datasets"):
@@ -245,7 +251,7 @@ def populate_mock_data():
             # Generate random embedding
             embedding = dataset_service.rag_service.embedding_service.encode_dataset_item(dataset)
 
-            dataset_service.add_dataset(dataset, embedding, csv_sample=[csv_bytes])
+            dataset_service.add_dataset(dataset, embedding, data=[placeholder_file], csv_sample=[csv_bytes])
         except Exception as e:
             print(f"Error adding dataset {dataset.dataset_id}: {e}")
 
@@ -255,7 +261,7 @@ def populate_mock_data():
             # Generate random embedding
             embedding = model_service.rag_service.embedding_service.encode_model_item(model)
 
-            model_service.add_model(model, embedding, csv_sample=[csv_bytes])
+            model_service.add_model(model, embedding, weights=[placeholder_file], csv_sample=[csv_bytes])
         except Exception as e:
             print(f"Error adding model {model.model_id}: {e}")
 
@@ -307,6 +313,5 @@ if __name__ == "__main__":
         qdrant_service = get_qdrant_service()
         datasets_count = qdrant_service.client.count(collection_name=settings.QDRANT_DATASETS_COLLECTION)
         models_count = qdrant_service.client.count(collection_name=settings.QDRANT_MODELS_COLLECTION)
-        
-        print(f"After CSV: Datasets={datasets_count.count}, Models={models_count.count}")
 
+        print(f"After CSV: Datasets={datasets_count.count}, Models={models_count.count}")
